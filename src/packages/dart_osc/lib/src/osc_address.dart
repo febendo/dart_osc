@@ -7,49 +7,60 @@ library;
 /// in an OSC Address Space. It begins with '/' and contains the names of
 /// all containers and the method, separated by forward slashes.
 class OscAddress {
-  final String _address;
-  final List<String> _parts;
-
   /// Creates an OSC Address from a string representation
-  OscAddress(String address)
+  OscAddress(final String address)
       : _address = address,
         _parts = _parseAddress(address) {
     _validateAddress(address);
   }
+  final String _address;
+  final List<String> _parts;
 
   /// Validates that the address string is a valid OSC address
-  static void _validateAddress(String address) {
+  static void _validateAddress(final String address) {
     if (address.isEmpty || !address.startsWith('/')) {
       throw ArgumentError('OSC Address must start with "/": "$address"');
     }
 
     // Check for forbidden characters
-    const forbiddenChars = {' ', '#', '*', ',', '?', '[', ']', '{', '}'};
+    const Set<String> forbiddenChars = <String>{
+      ' ',
+      '#',
+      '*',
+      ',',
+      '?',
+      '[',
+      ']',
+      '{',
+      '}'
+    };
 
     for (int i = 0; i < address.length; i++) {
-      final char = address[i];
+      final String char = address[i];
       if (forbiddenChars.contains(char)) {
-        throw ArgumentError('OSC Address contains forbidden character "$char": "$address"');
+        throw ArgumentError(
+            'OSC Address contains forbidden character "$char": "$address"');
       }
 
       // Check ASCII range (printable characters)
-      final codeUnit = address.codeUnitAt(i);
+      final int codeUnit = address.codeUnitAt(i);
       if (codeUnit < 32 || codeUnit > 126) {
-        throw ArgumentError('OSC Address contains non-printable character: "$address"');
+        throw ArgumentError(
+            'OSC Address contains non-printable character: "$address"');
       }
     }
   }
 
   /// Parses the address string into its component parts
-  static List<String> _parseAddress(String address) {
+  static List<String> _parseAddress(final String address) {
     if (address == '/') {
-      return [];
+      return <String>[];
     }
 
     // Remove leading slash and split by '/'
-    final withoutLeadingSlash = address.substring(1);
+    final String withoutLeadingSlash = address.substring(1);
     if (withoutLeadingSlash.isEmpty) {
-      return [];
+      return <String>[];
     }
 
     return withoutLeadingSlash.split('/');
@@ -66,14 +77,15 @@ class OscAddress {
   String? get methodName => _parts.isEmpty ? null : _parts.last;
 
   /// Returns the container path (all parts except the last)
-  List<String> get containerPath => _parts.isEmpty ? [] : _parts.sublist(0, _parts.length - 1);
+  List<String> get containerPath =>
+      _parts.isEmpty ? <String>[] : _parts.sublist(0, _parts.length - 1);
 
   /// Returns the parent address (without the method name)
   OscAddress? get parent {
     if (_parts.isEmpty) return null;
     if (_parts.length == 1) return OscAddress('/');
 
-    final parentParts = _parts.sublist(0, _parts.length - 1);
+    final List<String> parentParts = _parts.sublist(0, _parts.length - 1);
     return OscAddress('/${parentParts.join('/')}');
   }
 
@@ -81,7 +93,7 @@ class OscAddress {
   bool get isRoot => _address == '/';
 
   /// Returns true if this address is a direct child of the given parent
-  bool isChildOf(OscAddress parent) {
+  bool isChildOf(final OscAddress parent) {
     if (parent.isRoot) {
       return _parts.length == 1;
     }
@@ -100,7 +112,7 @@ class OscAddress {
   }
 
   /// Returns true if this address is a descendant of the given ancestor
-  bool isDescendantOf(OscAddress ancestor) {
+  bool isDescendantOf(final OscAddress ancestor) {
     if (ancestor.isRoot) {
       return !isRoot;
     }
@@ -119,7 +131,7 @@ class OscAddress {
   }
 
   /// Creates a child address by appending a name
-  OscAddress child(String name) {
+  OscAddress child(final String name) {
     _validateAddressPart(name);
 
     if (isRoot) {
@@ -130,22 +142,35 @@ class OscAddress {
   }
 
   /// Validates that a string is a valid address part (no forbidden characters)
-  static void _validateAddressPart(String part) {
+  static void _validateAddressPart(final String part) {
     if (part.isEmpty) {
       throw ArgumentError('Address part cannot be empty');
     }
 
-    const forbiddenChars = {' ', '#', '*', ',', '/', '?', '[', ']', '{', '}'};
+    const Set<String> forbiddenChars = <String>{
+      ' ',
+      '#',
+      '*',
+      ',',
+      '/',
+      '?',
+      '[',
+      ']',
+      '{',
+      '}'
+    };
 
     for (int i = 0; i < part.length; i++) {
-      final char = part[i];
+      final String char = part[i];
       if (forbiddenChars.contains(char)) {
-        throw ArgumentError('Address part contains forbidden character "$char": "$part"');
+        throw ArgumentError(
+            'Address part contains forbidden character "$char": "$part"');
       }
 
-      final codeUnit = part.codeUnitAt(i);
+      final int codeUnit = part.codeUnitAt(i);
       if (codeUnit < 32 || codeUnit > 126) {
-        throw ArgumentError('Address part contains non-printable character: "$part"');
+        throw ArgumentError(
+            'Address part contains non-printable character: "$part"');
       }
     }
   }
@@ -154,15 +179,12 @@ class OscAddress {
   int get depth => _parts.length;
 
   @override
-  bool operator ==(Object other) {
-    return other is OscAddress && other._address == _address;
-  }
+  bool operator ==(final Object other) =>
+      other is OscAddress && other._address == _address;
 
   @override
   int get hashCode => _address.hashCode;
 
   /// Compares two addresses lexicographically
-  int compareTo(OscAddress other) {
-    return _address.compareTo(other._address);
-  }
+  int compareTo(final OscAddress other) => _address.compareTo(other._address);
 }

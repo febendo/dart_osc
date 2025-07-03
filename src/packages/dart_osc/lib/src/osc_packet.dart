@@ -2,8 +2,9 @@
 library;
 
 import 'dart:typed_data';
-import 'osc_message.dart';
-import 'osc_bundle.dart';
+
+import 'package:dart_osc/src/osc_bundle.dart';
+import 'package:dart_osc/src/osc_message.dart';
 
 /// Abstract base class for all OSC packets (messages and bundles)
 ///
@@ -34,33 +35,34 @@ abstract class OscPacket {
   ///
   /// This factory method examines the first byte to determine whether
   /// the packet is a message or bundle and returns the appropriate type.
-  static OscPacket decode(Uint8List bytes) {
+  static OscPacket decode(final Uint8List bytes) {
     if (bytes.isEmpty) {
       throw FormatException('Empty packet data');
     }
 
     // Check first byte to distinguish between message and bundle
-    if (bytes[0] == 0x23) { // '#' character (start of "#bundle")
+    if (bytes[0] == 0x23) {
+      // '#' character (start of "#bundle")
       return _decodeBundle(bytes);
-    } else if (bytes[0] == 0x2f) { // '/' character (start of address pattern)
+    } else if (bytes[0] == 0x2f) {
+      // '/' character (start of address pattern)
       return _decodeMessage(bytes);
     } else {
       throw FormatException('Invalid OSC packet: first byte is ${bytes[0]}');
     }
   }
 
-  static dynamic _decodeMessage(Uint8List bytes) {
-    return OscMessage.decode(bytes);
-  }
+  static dynamic _decodeMessage(final Uint8List bytes) =>
+      OscMessage.decode(bytes);
 
-  static dynamic _decodeBundle(Uint8List bytes) {
-    return OscBundle.decode(bytes);
-  }
+  static dynamic _decodeBundle(final Uint8List bytes) =>
+      OscBundle.decode(bytes);
 
   /// Validates that the packet size is a multiple of 4 bytes
-  static void validatePacketSize(List<int> bytes) {
+  static void validatePacketSize(final List<int> bytes) {
     if (bytes.length % 4 != 0) {
-      throw FormatException('OSC packet size must be multiple of 4 bytes, got ${bytes.length}');
+      throw FormatException(
+          'OSC packet size must be multiple of 4 bytes, got ${bytes.length}');
     }
   }
 }

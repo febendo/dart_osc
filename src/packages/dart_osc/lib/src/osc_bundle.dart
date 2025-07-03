@@ -2,12 +2,13 @@
 library;
 
 import 'dart:typed_data';
-import 'osc_packet.dart';
-import 'osc_message.dart';
-import 'osc_time_tag.dart';
-import 'osc_encoder.dart';
-import 'osc_decoder.dart';
-import 'osc_exceptions.dart';
+
+import 'package:dart_osc/src/osc_decoder.dart';
+import 'package:dart_osc/src/osc_encoder.dart';
+import 'package:dart_osc/src/osc_exceptions.dart';
+import 'package:dart_osc/src/osc_message.dart';
+import 'package:dart_osc/src/osc_packet.dart';
+import 'package:dart_osc/src/osc_time_tag.dart';
 
 /// Represents an OSC Bundle as defined in the OSC specification.
 ///
@@ -20,26 +21,24 @@ import 'osc_exceptions.dart';
 /// invoked in immediate succession. The time tag determines when the bundle
 /// should be processed (immediately if the special "immediate" time tag is used).
 class OscBundle extends OscPacket {
+  /// Creates an OSC Bundle with the given time tag and elements
+  OscBundle(this.timeTag, this.elements) {
+    _validateBundleConstraints();
+  }
   static const String _bundleString = '#bundle';
 
   final OscTimeTag timeTag;
   final List<OscPacket> elements;
 
-  /// Creates an OSC Bundle with the given time tag and elements
-  OscBundle(this.timeTag, this.elements) {
-    _validateBundleConstraints();
-  }
-
   /// Validates bundle time tag constraints for nested bundles
   void _validateBundleConstraints() {
-    for (final element in elements) {
+    for (final OscPacket element in elements) {
       if (element is OscBundle) {
         // OSC spec: nested bundle time tag must be >= parent time tag
         if (element.timeTag.isBefore(timeTag)) {
           throw ArgumentError(
-            'Nested bundle time tag must be >= parent bundle time tag. '
-            'Parent: ${timeTag.ntpTimestamp}, Child: ${element.timeTag.ntpTimestamp}'
-          );
+              'Nested bundle time tag must be >= parent bundle time tag. '
+              'Parent: ${timeTag.ntpTimestamp}, Child: ${element.timeTag.ntpTimestamp}');
         }
       }
     }
@@ -54,8 +53,8 @@ class OscBundle extends OscPacket {
   /// Encodes this bundle to its binary representation
   @override
   List<int> encode() {
-    final encoder = OscEncoder();
-    final bytes = <int>[];
+    final OscEncoder encoder = OscEncoder();
+    final List<int> bytes = <int>[];
 
     // Encode bundle identifier string
     bytes.addAll(encoder.encodeString(_bundleString));
@@ -64,8 +63,8 @@ class OscBundle extends OscPacket {
     bytes.addAll(encoder.encodeTimeTag(timeTag));
 
     // Encode each bundle element with size prefix
-    for (final element in elements) {
-      final elementBytes = element.encode();
+    for (final OscPacket element in elements) {
+      final List<int> elementBytes = element.encode();
 
       // Add element size (int32)
       bytes.addAll(encoder.encodeInt32(elementBytes.length));
@@ -80,30 +79,32 @@ class OscBundle extends OscPacket {
   }
 
   /// Decodes an OSC Bundle from binary data
-  static OscBundle decode(Uint8List bytes) {
-    final decoder = OscDecoder();
+  static OscBundle decode(final Uint8List bytes) {
+    final OscDecoder decoder = OscDecoder();
     int offset = 0;
 
     // Decode and validate bundle identifier
-    final bundleStringResult = decoder.decodeString(bytes, offset);
+    final DecodeResult<String> bundleStringResult =
+        decoder.decodeString(bytes, offset);
     if (bundleStringResult.value != _bundleString) {
       throw OscFormatException(
-        'Invalid bundle identifier: expected "$_bundleString", got "${bundleStringResult.value}"'
+        'Invalid bundle identifier: expected "$_bundleString", got "${bundleStringResult.value}"',
       );
     }
     offset += bundleStringResult.bytesRead;
 
     // Decode time tag
-    final timeTagResult = decoder.decodeTimeTag(bytes, offset);
-    final timeTag = timeTagResult.value;
+    final DecodeResult<OscTimeTag> timeTagResult =
+        decoder.decodeTimeTag(bytes, offset);
+    final OscTimeTag timeTag = timeTagResult.value;
     offset += timeTagResult.bytesRead;
 
     // Decode bundle elements
-    final elements = <OscPacket>[];
+    final List<OscPacket> elements = <OscPacket>[];
     while (offset < bytes.length) {
       // Decode element size
-      final sizeResult = decoder.decodeInt32(bytes, offset);
-      final elementSize = sizeResult.value;
+      final DecodeResult<int> sizeResult = decoder.decodeInt32(bytes, offset);
+      final int elementSize = sizeResult.value;
       offset += sizeResult.bytesRead;
 
       if (elementSize < 0) {
@@ -112,16 +113,17 @@ class OscBundle extends OscPacket {
 
       if (offset + elementSize > bytes.length) {
         throw OscDecodingException(
-          'Bundle element size exceeds remaining data: size=$elementSize, remaining=${bytes.length - offset}'
+          'Bundle element size exceeds remaining data: size=$elementSize, remaining=${bytes.length - offset}',
         );
       }
 
       // Extract element bytes
-      final elementBytes = bytes.sublist(offset, offset + elementSize);
+      final Uint8List elementBytes =
+          bytes.sublist(offset, offset + elementSize);
       offset += elementSize;
 
       // Decode element (could be message or nested bundle)
-      final element = _decodeElement(elementBytes);
+      final OscPacket element = _decodeElement(elementBytes);
       elements.add(element);
     }
 
@@ -129,26 +131,29 @@ class OscBundle extends OscPacket {
   }
 
   /// Decodes a bundle element (message or nested bundle)
-  static OscPacket _decodeElement(Uint8List bytes) {
+  static OscPacket _decodeElement(final Uint8List bytes) {
     if (bytes.isEmpty) {
       throw OscDecodingException('Empty bundle element');
     }
 
     // Check first byte to determine element type
-    if (bytes[0] == 0x23) { // '#' character (start of "#bundle")
+    if (bytes[0] == 0x23) {
+      // '#' character (start of "#bundle")
       return OscBundle.decode(bytes);
-    } else if (bytes[0] == 0x2f) { // '/' character (start of address pattern)
+    } else if (bytes[0] == 0x2f) {
+      // '/' character (start of address pattern)
       return OscMessage.decode(bytes);
     } else {
-      throw OscDecodingException('Invalid bundle element: first byte is ${bytes[0]}');
+      throw OscDecodingException(
+          'Invalid bundle element: first byte is ${bytes[0]}');
     }
   }
 
   /// Returns all messages in this bundle (including nested bundles)
   List<OscMessage> getAllMessages() {
-    final messages = <OscMessage>[];
+    final List<OscMessage> messages = <OscMessage>[];
 
-    for (final element in elements) {
+    for (final OscPacket element in elements) {
       if (element is OscMessage) {
         messages.add(element);
       } else if (element is OscBundle) {
@@ -161,9 +166,9 @@ class OscBundle extends OscPacket {
 
   /// Returns all bundles nested within this bundle
   List<OscBundle> getNestedBundles() {
-    final bundles = <OscBundle>[];
+    final List<OscBundle> bundles = <OscBundle>[];
 
-    for (final element in elements) {
+    for (final OscPacket element in elements) {
       if (element is OscBundle) {
         bundles.add(element);
         bundles.addAll(element.getNestedBundles());
@@ -176,7 +181,7 @@ class OscBundle extends OscPacket {
   /// Returns the total number of elements (including nested)
   int get totalElementCount {
     int count = elements.length;
-    for (final element in elements) {
+    for (final OscPacket element in elements) {
       if (element is OscBundle) {
         count += element.totalElementCount;
       }
@@ -187,22 +192,26 @@ class OscBundle extends OscPacket {
   /// Returns the maximum nesting depth of this bundle
   int get maxNestingDepth {
     int maxDepth = 1;
-    for (final element in elements) {
+    for (final OscPacket element in elements) {
       if (element is OscBundle) {
         maxDepth = maxDepth > (element.maxNestingDepth + 1)
-                  ? maxDepth
-                  : (element.maxNestingDepth + 1);
+            ? maxDepth
+            : (element.maxNestingDepth + 1);
       }
     }
     return maxDepth;
   }
 
   /// Returns true if this bundle contains any messages
-  bool get hasMessages => elements.any((element) =>
-    element is OscMessage || (element is OscBundle && element.hasMessages));
+  bool get hasMessages => elements.any(
+        (final element) =>
+            element is OscMessage ||
+            (element is OscBundle && element.hasMessages),
+      );
 
   /// Returns true if this bundle contains any nested bundles
-  bool get hasNestedBundles => elements.any((element) => element is OscBundle);
+  bool get hasNestedBundles =>
+      elements.any((final element) => element is OscBundle);
 
   /// Returns true if this bundle is empty (no elements)
   bool get isEmpty => elements.isEmpty;
@@ -211,7 +220,7 @@ class OscBundle extends OscPacket {
   bool get isNotEmpty => elements.isNotEmpty;
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other is! OscBundle) return false;
 
     if (timeTag != other.timeTag) return false;
@@ -229,7 +238,9 @@ class OscBundle extends OscPacket {
 
   @override
   String toString() {
-    final elementStrings = elements.map((element) => element.toString()).join(', ');
+    final String elementStrings = elements
+        .map((final OscPacket element) => element.toString())
+        .join(', ');
     return 'OscBundle($timeTag, [$elementStrings])';
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dart_osc/dart_osc.dart';
@@ -20,19 +21,19 @@ void main() {
       });
 
       test('should bind to a port successfully', () async {
-        await socket1.bind(port: 0); // Use any available port
+        await socket1.bind(); // Use any available port
         expect(socket1.isBound, isTrue);
         expect(socket1.localPort, isNotNull);
         expect(socket1.localAddress, isNotNull);
       });
 
       test('should throw error when binding to already bound socket', () async {
-        await socket1.bind(port: 0);
-        expect(socket1.bind(port: 0), throwsStateError);
+        await socket1.bind();
+        expect(socket1.bind(), throwsStateError);
       });
 
       test('should close socket properly', () async {
-        await socket1.bind(port: 0);
+        await socket1.bind();
         expect(socket1.isBound, isTrue);
 
         socket1.close();
@@ -43,23 +44,25 @@ void main() {
 
       test('should send and receive OSC message between sockets', () async {
         // Bind both sockets
-        await socket1.bind(port: 0);
-        await socket2.bind(port: 0);
+        await socket1.bind();
+        await socket2.bind();
 
-        final testMessage = OscMessage('/test/message', [
+        final OscMessage testMessage =
+            OscMessage('/test/message', <OscArgument>[
           OscArgument.int32(42),
           OscArgument.float32(3.14),
           OscArgument.string('hello'),
         ]);
 
         // Set up receiver
-        final receiveFuture = socket2.receivePacket(Duration(seconds: 2));
+        final Future<OscPacketEvent?> receiveFuture =
+            socket2.receivePacket(Duration(seconds: 2));
 
         // Give a small delay to ensure receiver is ready
         await Future.delayed(Duration(milliseconds: 10));
 
         // Send message
-        final bytesSent = socket1.sendPacket(
+        final int bytesSent = socket1.sendPacket(
           testMessage,
           InternetAddress.loopbackIPv4,
           socket2.localPort!,
@@ -68,13 +71,15 @@ void main() {
         expect(bytesSent, greaterThan(0));
 
         // Receive and verify message
-        final receivedData = await receiveFuture;
+        final OscPacketEvent? receivedData = await receiveFuture;
         expect(receivedData, isNotNull);
         expect(receivedData!.isMessage, isTrue);
 
-        final receivedMessage = receivedData.asMessage;
+        final OscMessage receivedMessage = receivedData.asMessage;
         expect(
-            receivedMessage.addressPattern.toString(), equals('/test/message'));
+          receivedMessage.addressPattern.toString(),
+          equals('/test/message'),
+        );
         expect(receivedMessage.arguments.length, equals(3));
         expect(receivedMessage.arguments[0].value, equals(42));
         expect(receivedMessage.arguments[1].value, closeTo(3.14, 0.001));
@@ -82,23 +87,25 @@ void main() {
       });
 
       test('should send and receive OSC bundle between sockets', () async {
-        await socket1.bind(port: 0);
-        await socket2.bind(port: 0);
+        await socket1.bind();
+        await socket2.bind();
 
-        final messages = [
-          OscMessage('/bundle/msg1', [OscArgument.int32(1)]),
-          OscMessage('/bundle/msg2', [OscArgument.float32(2.0)]),
+        final List<OscMessage> messages = <OscMessage>[
+          OscMessage('/bundle/msg1', <OscArgument>[OscArgument.int32(1)]),
+          OscMessage('/bundle/msg2', <OscArgument>[OscArgument.float32(2)]),
         ];
-        final testBundle = OscBundle(OscTimeTag.immediate(), messages);
+        final OscBundle testBundle =
+            OscBundle(OscTimeTag.immediate(), messages);
 
         // Set up receiver
-        final receiveFuture = socket2.receivePacket(Duration(seconds: 2));
+        final Future<OscPacketEvent?> receiveFuture =
+            socket2.receivePacket(Duration(seconds: 2));
 
         // Give a small delay to ensure receiver is ready
         await Future.delayed(Duration(milliseconds: 10));
 
         // Send bundle
-        final bytesSent = socket1.sendPacket(
+        final int bytesSent = socket1.sendPacket(
           testBundle,
           InternetAddress.loopbackIPv4,
           socket2.localPort!,
@@ -107,73 +114,78 @@ void main() {
         expect(bytesSent, greaterThan(0));
 
         // Receive and verify bundle
-        final receivedData = await receiveFuture;
+        final OscPacketEvent? receivedData = await receiveFuture;
         expect(receivedData, isNotNull);
         expect(receivedData!.isBundle, isTrue);
 
-        final receivedBundle = receivedData.asBundle;
+        final OscBundle receivedBundle = receivedData.asBundle;
         expect(receivedBundle.timeTag.isImmediate, isTrue);
         expect(receivedBundle.elements.length, equals(2));
 
-        final msg1 = receivedBundle.elements[0] as OscMessage;
-        final msg2 = receivedBundle.elements[1] as OscMessage;
+        final OscMessage msg1 = receivedBundle.elements[0] as OscMessage;
+        final OscMessage msg2 = receivedBundle.elements[1] as OscMessage;
 
         expect(msg1.addressPattern.toString(), equals('/bundle/msg1'));
         expect(msg2.addressPattern.toString(), equals('/bundle/msg2'));
       });
 
       test('should timeout when no packet is received', () async {
-        await socket1.bind(port: 0);
+        await socket1.bind();
 
-        final receivedData =
+        final OscPacketEvent? receivedData =
             await socket1.receivePacket(Duration(milliseconds: 100));
         expect(receivedData, isNull);
       });
 
       test('should send to localhost convenience method', () async {
-        await socket1.bind(port: 0);
-        await socket2.bind(port: 0);
+        await socket1.bind();
+        await socket2.bind();
 
-        final testMessage =
-            OscMessage('/localhost/test', [OscArgument.string('test')]);
+        final OscMessage testMessage = OscMessage(
+            '/localhost/test', <OscArgument>[OscArgument.string('test')]);
 
-        final receiveFuture = socket2.receivePacket(Duration(seconds: 2));
+        final Future<OscPacketEvent?> receiveFuture =
+            socket2.receivePacket(Duration(seconds: 2));
         await Future.delayed(Duration(milliseconds: 10));
 
-        final bytesSent =
+        final int bytesSent =
             await socket1.sendToLocalHost(testMessage, socket2.localPort!);
         expect(bytesSent, greaterThan(0));
 
-        final receivedData = await receiveFuture;
+        final OscPacketEvent? receivedData = await receiveFuture;
         expect(receivedData, isNotNull);
-        expect(receivedData!.asMessage.addressPattern.toString(),
-            equals('/localhost/test'));
+        expect(
+          receivedData!.asMessage.addressPattern.toString(),
+          equals('/localhost/test'),
+        );
       });
 
       test('should handle packet stream correctly', () async {
-        await socket1.bind(port: 0);
-        await socket2.bind(port: 0, eventDriven: true);
+        await socket1.bind();
+        await socket2.bind(eventDriven: true);
 
-        final messages = [
-          OscMessage('/stream/msg1', [OscArgument.int32(1)]),
-          OscMessage('/stream/msg2', [OscArgument.int32(2)]),
-          OscMessage('/stream/msg3', [OscArgument.int32(3)]),
+        final List<OscMessage> messages = <OscMessage>[
+          OscMessage('/stream/msg1', <OscArgument>[OscArgument.int32(1)]),
+          OscMessage('/stream/msg2', <OscArgument>[OscArgument.int32(2)]),
+          OscMessage('/stream/msg3', <OscArgument>[OscArgument.int32(3)]),
         ];
 
         // Set up stream receiver
-        final receivedPackets = <OscPacketEvent>[];
-        final stream = socket2.onPacket;
-        final streamSubscription = stream?.listen((packet) {
-          receivedPackets.add(packet);
-        });
+        final List<OscPacketEvent> receivedPackets = <OscPacketEvent>[];
+        final Stream<OscPacketEvent>? stream = socket2.onPacket;
+        final StreamSubscription<OscPacketEvent>? streamSubscription =
+            stream?.listen(receivedPackets.add);
 
         // Give time for stream to be ready
         await Future.delayed(Duration(milliseconds: 50));
 
         // Send multiple messages
-        for (final message in messages) {
+        for (final OscMessage message in messages) {
           socket1.sendPacket(
-              message, InternetAddress.loopbackIPv4, socket2.localPort!);
+            message,
+            InternetAddress.loopbackIPv4,
+            socket2.localPort!,
+          );
           await Future.delayed(Duration(milliseconds: 10));
         }
 
@@ -184,14 +196,15 @@ void main() {
 
         expect(receivedPackets.length, equals(3));
         for (int i = 0; i < 3; i++) {
-          final msg = receivedPackets[i].asMessage;
+          final OscMessage msg = receivedPackets[i].asMessage;
           expect(msg.addressPattern.toString(), equals('/stream/msg${i + 1}'));
           expect(msg.arguments[0].value, equals(i + 1));
         }
       });
 
       test('should throw error when sending without binding', () {
-        final message = OscMessage('/test', [OscArgument.int32(1)]);
+        final OscMessage message =
+            OscMessage('/test', <OscArgument>[OscArgument.int32(1)]);
 
         expect(
           () => socket1.sendPacket(message, InternetAddress.loopbackIPv4, 9000),
@@ -207,7 +220,7 @@ void main() {
       });
 
       test('should handle socket options correctly', () async {
-        await socket1.bind(port: 0);
+        await socket1.bind();
 
         // These should not throw errors
         expect(() => socket1.setBroadcast(true), returnsNormally);
@@ -216,10 +229,11 @@ void main() {
 
     group('OscPacketEvent', () {
       test('should provide correct event information', () {
-        final message = OscMessage('/event/test', [OscArgument.string('data')]);
-        final timestamp = DateTime.now();
+        final OscMessage message = OscMessage(
+            '/event/test', <OscArgument>[OscArgument.string('data')]);
+        final DateTime timestamp = DateTime.now();
 
-        final event = OscPacketEvent(
+        final OscPacketEvent event = OscPacketEvent(
           message,
           remoteAddress: InternetAddress.loopbackIPv4,
           remotePort: 9000,
@@ -238,10 +252,10 @@ void main() {
 
     group('OscErrorEvent', () {
       test('should capture error information correctly', () {
-        final error = Exception('Test error');
-        final rawData = Uint8List.fromList([1, 2, 3, 4]);
+        final Exception error = Exception('Test error');
+        final Uint8List rawData = Uint8List.fromList(<int>[1, 2, 3, 4]);
 
-        final errorEvent = OscErrorEvent(
+        final OscErrorEvent errorEvent = OscErrorEvent(
           'Test error message',
           error: error,
           remoteAddress: InternetAddress.loopbackIPv4,
@@ -256,7 +270,7 @@ void main() {
         expect(errorEvent.rawData, equals(rawData));
         expect(errorEvent.timestamp, isNotNull);
 
-        final str = errorEvent.toString();
+        final String str = errorEvent.toString();
         expect(str, contains('OscErrorEvent'));
         expect(str, contains('Test error message'));
         expect(str, contains('127.0.0.1:9000'));
@@ -280,15 +294,16 @@ void main() {
 
       test('should handle rapid message exchange', () async {
         try {
-          await socket1.bind(port: 0);
-          await socket2.bind(port: 0, eventDriven: true);
+          await socket1.bind();
+          await socket2.bind(eventDriven: true);
 
-          final messageCount = 10;
-          final receivedMessages = <OscMessage>[];
+          final int messageCount = 10;
+          final List<OscMessage> receivedMessages = <OscMessage>[];
 
           // Set up stream receiver
-          final stream = socket2.onPacket;
-          final subscription = stream?.listen((packetData) {
+          final Stream<OscPacketEvent>? stream = socket2.onPacket;
+          final StreamSubscription<OscPacketEvent>? subscription =
+              stream?.listen((final packetData) {
             receivedMessages.add(packetData.asMessage);
           });
 
@@ -297,10 +312,13 @@ void main() {
 
           // Send multiple messages rapidly
           for (int i = 0; i < messageCount; i++) {
-            final message =
-                OscMessage('/rapid/test/$i', [OscArgument.int32(i)]);
+            final OscMessage message = OscMessage(
+                '/rapid/test/$i', <OscArgument>[OscArgument.int32(i)]);
             socket1.sendPacket(
-                message, InternetAddress.loopbackIPv4, socket2.localPort!);
+              message,
+              InternetAddress.loopbackIPv4,
+              socket2.localPort!,
+            );
           }
 
           // Wait for all messages to be received
@@ -308,7 +326,7 @@ void main() {
 
           expect(receivedMessages.length, equals(messageCount));
           for (int i = 0; i < messageCount; i++) {
-            final msg = receivedMessages[i];
+            final OscMessage msg = receivedMessages[i];
             expect(msg.addressPattern.toString(), equals('/rapid/test/$i'));
             expect(msg.arguments[0].value, equals(i));
           }
@@ -322,25 +340,29 @@ void main() {
 
       test('should handle large OSC bundles', () async {
         try {
-          await socket1.bind(port: 0);
-          await socket2.bind(port: 0);
+          await socket1.bind();
+          await socket2.bind();
 
           // Create a large bundle with many messages
-          final messages = <OscMessage>[];
+          final List<OscMessage> messages = <OscMessage>[];
           for (int i = 0; i < 50; i++) {
-            messages.add(OscMessage('/large/bundle/msg/$i', [
-              OscArgument.int32(i),
-              OscArgument.float32(i * 0.1),
-              OscArgument.string('message_$i'),
-            ]));
+            messages.add(
+              OscMessage('/large/bundle/msg/$i', <OscArgument>[
+                OscArgument.int32(i),
+                OscArgument.float32(i * 0.1),
+                OscArgument.string('message_$i'),
+              ]),
+            );
           }
 
-          final largeBundle = OscBundle(OscTimeTag.immediate(), messages);
+          final OscBundle largeBundle =
+              OscBundle(OscTimeTag.immediate(), messages);
 
-          final receiveFuture = socket2.receivePacket(Duration(seconds: 3));
+          final Future<OscPacketEvent?> receiveFuture =
+              socket2.receivePacket(Duration(seconds: 3));
           await Future.delayed(Duration(milliseconds: 10));
 
-          final bytesSent = socket1.sendPacket(
+          final int bytesSent = socket1.sendPacket(
             largeBundle,
             InternetAddress.loopbackIPv4,
             socket2.localPort!,
@@ -348,20 +370,22 @@ void main() {
 
           expect(bytesSent, greaterThan(1000)); // Should be a large packet
 
-          final receivedData = await receiveFuture;
+          final OscPacketEvent? receivedData = await receiveFuture;
           expect(receivedData, isNotNull);
           expect(receivedData!.isBundle, isTrue);
 
-          final receivedBundle = receivedData.asBundle;
+          final OscBundle receivedBundle = receivedData.asBundle;
           expect(receivedBundle.elements.length, equals(50));
 
           // Verify a few messages
-          final msg0 = receivedBundle.elements[0] as OscMessage;
-          final msg49 = receivedBundle.elements[49] as OscMessage;
+          final OscMessage msg0 = receivedBundle.elements[0] as OscMessage;
+          final OscMessage msg49 = receivedBundle.elements[49] as OscMessage;
 
           expect(msg0.addressPattern.toString(), equals('/large/bundle/msg/0'));
           expect(
-              msg49.addressPattern.toString(), equals('/large/bundle/msg/49'));
+            msg49.addressPattern.toString(),
+            equals('/large/bundle/msg/49'),
+          );
         } finally {
           socket1.close();
           socket2.close();

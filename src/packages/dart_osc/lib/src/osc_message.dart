@@ -2,13 +2,15 @@
 library;
 
 import 'dart:typed_data';
-import 'osc_packet.dart';
-import 'osc_address_pattern.dart';
-import 'osc_argument.dart';
-import 'osc_type_tag_string.dart';
-import 'osc_encoder.dart';
-import 'osc_decoder.dart';
-import 'osc_exceptions.dart';
+
+import 'package:dart_osc/src/osc_address_pattern.dart';
+import 'package:dart_osc/src/osc_argument.dart';
+import 'package:dart_osc/src/osc_decoder.dart';
+import 'package:dart_osc/src/osc_encoder.dart';
+import 'package:dart_osc/src/osc_exceptions.dart';
+import 'package:dart_osc/src/osc_packet.dart';
+import 'package:dart_osc/src/osc_time_tag.dart';
+import 'package:dart_osc/src/osc_type_tag_string.dart';
 
 /// Represents an OSC Message as defined in the OSC specification.
 ///
@@ -17,18 +19,21 @@ import 'osc_exceptions.dart';
 /// 2. An OSC Type Tag String
 /// 3. Zero or more OSC Arguments
 class OscMessage extends OscPacket {
-  final OscAddressPattern addressPattern;
-  final List<OscArgument> arguments;
-  late final OscTypeTagString typeTagString;
-
   /// Creates an OSC Message with the given address pattern and arguments
-  OscMessage(String addressPattern, this.arguments)
+  OscMessage(final String addressPattern, this.arguments)
       : addressPattern = OscAddressPattern(addressPattern) {
     typeTagString = OscTypeTagString(arguments);
   }
 
   /// Creates an OSC Message from components
-  OscMessage.fromComponents(this.addressPattern, this.arguments, this.typeTagString);
+  OscMessage.fromComponents(
+    this.addressPattern,
+    this.arguments,
+    this.typeTagString,
+  );
+  final OscAddressPattern addressPattern;
+  final List<OscArgument> arguments;
+  late final OscTypeTagString typeTagString;
 
   @override
   bool get isMessage => true;
@@ -39,8 +44,8 @@ class OscMessage extends OscPacket {
   /// Encodes this message to its binary representation
   @override
   List<int> encode() {
-    final encoder = OscEncoder();
-    final bytes = <int>[];
+    final OscEncoder encoder = OscEncoder();
+    final List<int> bytes = <int>[];
 
     // Encode address pattern
     bytes.addAll(encoder.encodeString(addressPattern.toString()));
@@ -49,7 +54,7 @@ class OscMessage extends OscPacket {
     bytes.addAll(encoder.encodeString(typeTagString.toString()));
 
     // Encode arguments
-    for (final argument in arguments) {
+    for (final OscArgument argument in arguments) {
       bytes.addAll(_encodeArgument(encoder, argument));
     }
 
@@ -59,7 +64,8 @@ class OscMessage extends OscPacket {
   }
 
   /// Encodes a single argument based on its type
-  List<int> _encodeArgument(OscEncoder encoder, OscArgument argument) {
+  List<int> _encodeArgument(
+      final OscEncoder encoder, final OscArgument argument) {
     switch (argument.typeTag) {
       case 'i':
         return encoder.encodeInt32(argument.value as int);
@@ -82,7 +88,7 @@ class OscMessage extends OscPacket {
       case 'r':
         return encoder.encodeColor(argument.value as int);
       case 'm':
-        final midi = argument.value as List<int>;
+        final List<int> midi = argument.value as List<int>;
         return encoder.encodeMidi(midi[0], midi[1], midi[2], midi[3]);
       case 'T':
         return encoder.encodeTrue();
@@ -93,28 +99,33 @@ class OscMessage extends OscPacket {
       case 'I':
         return encoder.encodeInfinitum();
       default:
-        throw OscEncodingException('Unknown argument type: ${argument.typeTag}');
+        throw OscEncodingException(
+          'Unknown argument type: ${argument.typeTag}',
+        );
     }
   }
 
   /// Decodes an OSC Message from binary data
-  static OscMessage decode(Uint8List bytes) {
-    final decoder = OscDecoder();
+  static OscMessage decode(final Uint8List bytes) {
+    final OscDecoder decoder = OscDecoder();
     int offset = 0;
 
     // Decode address pattern
-    final addressResult = decoder.decodeString(bytes, offset);
-    final addressPattern = OscAddressPattern(addressResult.value);
+    final DecodeResult<String> addressResult =
+        decoder.decodeString(bytes, offset);
+    final OscAddressPattern addressPattern =
+        OscAddressPattern(addressResult.value);
     offset += addressResult.bytesRead;
 
     // Try to decode type tag string (may be missing in legacy implementations)
     OscTypeTagString? typeTagString;
-    List<OscArgument> arguments = [];
+    List<OscArgument> arguments = <OscArgument>[];
 
     if (offset < bytes.length) {
       // Peek at the next string to see if it starts with comma
       try {
-        final typeTagResult = decoder.decodeString(bytes, offset);
+        final DecodeResult<String> typeTagResult =
+            decoder.decodeString(bytes, offset);
         if (typeTagResult.value.startsWith(',')) {
           // This is a type tag string
           typeTagString = OscTypeTagString.parse(typeTagResult.value);
@@ -139,20 +150,23 @@ class OscMessage extends OscPacket {
 
   /// Decodes arguments based on type tag string
   static List<OscArgument> _decodeArguments(
-    OscDecoder decoder,
-    Uint8List bytes,
-    int startOffset,
-    OscTypeTagString typeTagString,
+    final OscDecoder decoder,
+    final Uint8List bytes,
+    final int startOffset,
+    final OscTypeTagString typeTagString,
   ) {
-    final arguments = <OscArgument>[];
+    final List<OscArgument> arguments = <OscArgument>[];
     int offset = startOffset;
 
-    for (final typeTag in typeTagString.tags) {
+    for (final String typeTag in typeTagString.tags) {
       if (offset >= bytes.length) {
-        throw OscDecodingException('Insufficient data for argument with type tag: $typeTag');
+        throw OscDecodingException(
+          'Insufficient data for argument with type tag: $typeTag',
+        );
       }
 
-      final argument = _decodeArgument(decoder, bytes, offset, typeTag);
+      final ({OscArgument argument, int bytesRead}) argument =
+          _decodeArgument(decoder, bytes, offset, typeTag);
       arguments.add(argument.argument);
       offset += argument.bytesRead;
     }
@@ -162,57 +176,96 @@ class OscMessage extends OscPacket {
 
   /// Decodes a single argument based on its type tag
   static ({OscArgument argument, int bytesRead}) _decodeArgument(
-    OscDecoder decoder,
-    Uint8List bytes,
-    int offset,
-    String typeTag,
+    final OscDecoder decoder,
+    final Uint8List bytes,
+    final int offset,
+    final String typeTag,
   ) {
     switch (typeTag) {
       case 'i':
-        final result = decoder.decodeInt32(bytes, offset);
-        return (argument: OscArgument.int32(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<int> result = decoder.decodeInt32(bytes, offset);
+        return (
+          argument: OscArgument.int32(result.value),
+          bytesRead: result.bytesRead
+        );
       case 'f':
-        final result = decoder.decodeFloat32(bytes, offset);
-        return (argument: OscArgument.float32(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<double> result =
+            decoder.decodeFloat32(bytes, offset);
+        return (
+          argument: OscArgument.float32(result.value),
+          bytesRead: result.bytesRead
+        );
       case 's':
-        final result = decoder.decodeString(bytes, offset);
-        return (argument: OscArgument.string(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<String> result = decoder.decodeString(bytes, offset);
+        return (
+          argument: OscArgument.string(result.value),
+          bytesRead: result.bytesRead
+        );
       case 'b':
-        final result = decoder.decodeBlob(bytes, offset);
-        return (argument: OscArgument.blob(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<Uint8List> result =
+            decoder.decodeBlob(bytes, offset);
+        return (
+          argument: OscArgument.blob(result.value),
+          bytesRead: result.bytesRead
+        );
       case 'h':
-        final result = decoder.decodeInt64(bytes, offset);
-        return (argument: OscArgument.int64(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<int> result = decoder.decodeInt64(bytes, offset);
+        return (
+          argument: OscArgument.int64(result.value),
+          bytesRead: result.bytesRead
+        );
       case 't':
-        final result = decoder.decodeTimeTag(bytes, offset);
-        return (argument: OscArgument.timetag(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<OscTimeTag> result =
+            decoder.decodeTimeTag(bytes, offset);
+        return (
+          argument: OscArgument.timetag(result.value),
+          bytesRead: result.bytesRead
+        );
       case 'd':
-        final result = decoder.decodeDouble64(bytes, offset);
-        return (argument: OscArgument.double64(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<double> result =
+            decoder.decodeDouble64(bytes, offset);
+        return (
+          argument: OscArgument.double64(result.value),
+          bytesRead: result.bytesRead
+        );
       case 'S':
-        final result = decoder.decodeString(bytes, offset);
-        return (argument: OscArgument.symbol(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<String> result = decoder.decodeString(bytes, offset);
+        return (
+          argument: OscArgument.symbol(result.value),
+          bytesRead: result.bytesRead
+        );
       case 'c':
-        final result = decoder.decodeChar(bytes, offset);
-        return (argument: OscArgument.char(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<String> result = decoder.decodeChar(bytes, offset);
+        return (
+          argument: OscArgument.char(result.value),
+          bytesRead: result.bytesRead
+        );
       case 'r':
-        final result = decoder.decodeColor(bytes, offset);
-        return (argument: OscArgument.color(result.value), bytesRead: result.bytesRead);
+        final DecodeResult<int> result = decoder.decodeColor(bytes, offset);
+        return (
+          argument: OscArgument.color(result.value),
+          bytesRead: result.bytesRead
+        );
       case 'm':
-        final result = decoder.decodeMidi(bytes, offset);
-        final midi = result.value;
-        return (argument: OscArgument.midi(midi[0], midi[1], midi[2], midi[3]), bytesRead: result.bytesRead);
+        final DecodeResult<List<int>> result =
+            decoder.decodeMidi(bytes, offset);
+        final List<int> midi = result.value;
+        return (
+          argument: OscArgument.midi(midi[0], midi[1], midi[2], midi[3]),
+          bytesRead: result.bytesRead
+        );
       case 'T':
-        final result = decoder.decodeTrue(bytes, offset);
+        final DecodeResult<bool> result = decoder.decodeTrue(bytes, offset);
         return (argument: OscArgument.true_(), bytesRead: result.bytesRead);
       case 'F':
-        final result = decoder.decodeFalse(bytes, offset);
+        final DecodeResult<bool> result = decoder.decodeFalse(bytes, offset);
         return (argument: OscArgument.false_(), bytesRead: result.bytesRead);
       case 'N':
-        final result = decoder.decodeNil(bytes, offset);
+        final DecodeResult<void> result = decoder.decodeNil(bytes, offset);
         return (argument: OscArgument.nil(), bytesRead: result.bytesRead);
       case 'I':
-        final result = decoder.decodeInfinitum(bytes, offset);
+        final DecodeResult<double> result =
+            decoder.decodeInfinitum(bytes, offset);
         return (argument: OscArgument.infinitum(), bytesRead: result.bytesRead);
       default:
         throw OscDecodingException('Unknown type tag: $typeTag');
@@ -220,7 +273,7 @@ class OscMessage extends OscPacket {
   }
 
   @override
-  bool operator ==(Object other) {
+  bool operator ==(final Object other) {
     if (other is! OscMessage) return false;
 
     if (addressPattern != other.addressPattern) return false;
@@ -238,7 +291,8 @@ class OscMessage extends OscPacket {
 
   @override
   String toString() {
-    final argStrings = arguments.map((arg) => arg.toString()).join(', ');
-    return 'OscMessage(${addressPattern.toString()}, [$argStrings])';
+    final String argStrings =
+        arguments.map((final arg) => arg.toString()).join(', ');
+    return 'OscMessage($addressPattern, [$argStrings])';
   }
 }

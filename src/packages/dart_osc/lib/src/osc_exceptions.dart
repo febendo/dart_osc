@@ -3,8 +3,8 @@ library;
 
 /// Base exception for all OSC-related errors
 abstract class OscException implements Exception {
-  final String message;
   const OscException(this.message);
+  final String message;
 
   @override
   String toString() => 'OscException: $message';
@@ -12,13 +12,12 @@ abstract class OscException implements Exception {
 
 /// Exception thrown when OSC data format is invalid
 class OscFormatException extends OscException implements FormatException {
+  const OscFormatException(super.message, {this.source, this.offset});
   @override
   final dynamic source;
 
   @override
   final int? offset;
-
-  const OscFormatException(super.message, {this.source, this.offset});
 
   @override
   String toString() => 'OscFormatException: $message';

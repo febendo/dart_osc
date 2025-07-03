@@ -9,11 +9,6 @@ library;
 ///
 /// The special value 0x0000000000000001 means "immediately"
 class OscTimeTag {
-  static const int _ntpEpochOffset = 2208988800; // Seconds between 1900 and 1970
-  static const int _immediateTimestamp = 0x0000000000000001;
-
-  final int ntpTimestamp;
-
   /// Creates an OSC Time Tag from a raw NTP timestamp
   const OscTimeTag.fromNtpTimestamp(this.ntpTimestamp);
 
@@ -24,25 +19,31 @@ class OscTimeTag {
   ///
   /// Note: This loses some precision due to DateTime's microsecond resolution
   /// vs NTP's ~200 picosecond resolution
-  factory OscTimeTag.fromDateTime(DateTime dateTime) {
+  factory OscTimeTag.fromDateTime(final DateTime dateTime) {
     // Convert to UTC if not already
-    final utc = dateTime.toUtc();
+    final DateTime utc = dateTime.toUtc();
 
     // Calculate seconds since NTP epoch (1900)
-    final secondsSince1970 = utc.millisecondsSinceEpoch ~/ 1000;
-    final ntpSeconds = secondsSince1970 + _ntpEpochOffset;
+    final int secondsSince1970 = utc.millisecondsSinceEpoch ~/ 1000;
+    final int ntpSeconds = secondsSince1970 + _ntpEpochOffset;
 
     // Calculate fractional seconds from microseconds
-    final microseconds = utc.microsecond;
-    final fractionOfSecond = (microseconds * 1000) / 1000000.0; // Convert to nanoseconds then to fraction
-    final ntpFraction = (fractionOfSecond * 0x100000000).round();
+    final int microseconds = utc.microsecond;
+    final double fractionOfSecond = (microseconds * 1000) /
+        1000000.0; // Convert to nanoseconds then to fraction
+    final int ntpFraction = (fractionOfSecond * 0x100000000).round();
 
-    final ntpTimestamp = (ntpSeconds << 32) | ntpFraction;
+    final int ntpTimestamp = (ntpSeconds << 32) | ntpFraction;
     return OscTimeTag.fromNtpTimestamp(ntpTimestamp);
   }
 
   /// Creates an OSC Time Tag representing the current time
   factory OscTimeTag.now() => OscTimeTag.fromDateTime(DateTime.now());
+  static const int _ntpEpochOffset =
+      2208988800; // Seconds between 1900 and 1970
+  static const int _immediateTimestamp = 0x0000000000000001;
+
+  final int ntpTimestamp;
 
   /// Returns true if this is an "immediate" time tag
   bool get isImmediate => ntpTimestamp == _immediateTimestamp;
@@ -55,15 +56,15 @@ class OscTimeTag {
     if (isImmediate) return null;
 
     // Extract seconds and fraction
-    final ntpSeconds = (ntpTimestamp >> 32) & 0xFFFFFFFF;
-    final ntpFraction = ntpTimestamp & 0xFFFFFFFF;
+    final int ntpSeconds = (ntpTimestamp >> 32) & 0xFFFFFFFF;
+    final int ntpFraction = ntpTimestamp & 0xFFFFFFFF;
 
     // Convert NTP seconds to Unix seconds
-    final unixSeconds = ntpSeconds - _ntpEpochOffset;
+    final int unixSeconds = ntpSeconds - _ntpEpochOffset;
 
     // Convert fraction to microseconds
-    final fractionOfSecond = ntpFraction / 0x100000000;
-    final microseconds = (fractionOfSecond * 1000000).round();
+    final double fractionOfSecond = ntpFraction / 0x100000000;
+    final int microseconds = (fractionOfSecond * 1000000).round();
 
     return DateTime.fromMillisecondsSinceEpoch(
       unixSeconds * 1000 + (microseconds ~/ 1000),
@@ -78,9 +79,8 @@ class OscTimeTag {
   int get fraction => ntpTimestamp & 0xFFFFFFFF;
 
   @override
-  bool operator ==(Object other) {
-    return other is OscTimeTag && other.ntpTimestamp == ntpTimestamp;
-  }
+  bool operator ==(final Object other) =>
+      other is OscTimeTag && other.ntpTimestamp == ntpTimestamp;
 
   @override
   int get hashCode => ntpTimestamp.hashCode;
@@ -90,7 +90,7 @@ class OscTimeTag {
     if (isImmediate) {
       return 'OscTimeTag.immediate()';
     }
-    final dateTime = toDateTime();
+    final DateTime? dateTime = toDateTime();
     return 'OscTimeTag(${dateTime?.toIso8601String() ?? 'null'})';
   }
 
@@ -101,7 +101,7 @@ class OscTimeTag {
   /// positive if this is after other
   ///
   /// Immediate time tags are considered "before" all other time tags
-  int compareTo(OscTimeTag other) {
+  int compareTo(final OscTimeTag other) {
     if (isImmediate && other.isImmediate) return 0;
     if (isImmediate) return -1;
     if (other.isImmediate) return 1;
@@ -110,14 +110,14 @@ class OscTimeTag {
   }
 
   /// Returns true if this time tag is before the other
-  bool isBefore(OscTimeTag other) => compareTo(other) < 0;
+  bool isBefore(final OscTimeTag other) => compareTo(other) < 0;
 
   /// Returns true if this time tag is after the other
-  bool isAfter(OscTimeTag other) => compareTo(other) > 0;
+  bool isAfter(final OscTimeTag other) => compareTo(other) > 0;
 
   /// Returns true if this time tag is before or equal to the other
-  bool isBeforeOrEqual(OscTimeTag other) => compareTo(other) <= 0;
+  bool isBeforeOrEqual(final OscTimeTag other) => compareTo(other) <= 0;
 
   /// Returns true if this time tag is after or equal to the other
-  bool isAfterOrEqual(OscTimeTag other) => compareTo(other) >= 0;
+  bool isAfterOrEqual(final OscTimeTag other) => compareTo(other) >= 0;
 }
