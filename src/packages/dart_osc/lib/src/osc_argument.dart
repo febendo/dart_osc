@@ -38,14 +38,7 @@ class OscArgument {
   }
 
   /// Creates a blob argument (type tag 'b')
-  factory OscArgument.blob(Uint8List value) {
-    return OscArgument._('b', value);
-  }
-
-  /// Creates an int64 argument (type tag 'h') - extended type
-  factory OscArgument.int64(int value) {
-    return OscArgument._('h', value);
-  }
+  factory OscArgument.blob(final Uint8List value) => OscArgument._('b', value);
 
   /// Creates an int64 argument (type tag 'h') - extended type
   factory OscArgument.int64(final int value) => OscArgument._('h', value);

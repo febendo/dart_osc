@@ -52,10 +52,10 @@ abstract class OscPacket {
     }
   }
 
-  static dynamic _decodeMessage(final Uint8List bytes) =>
+  static OscMessage _decodeMessage(final Uint8List bytes) =>
       OscMessage.decode(bytes);
 
-  static dynamic _decodeBundle(final Uint8List bytes) =>
+  static OscPacket _decodeBundle(final Uint8List bytes) =>
       OscBundle.decode(bytes);
 
   /// Validates that the packet size is a multiple of 4 bytes
