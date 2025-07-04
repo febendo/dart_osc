@@ -371,9 +371,3 @@ void main() {
     });
   });
 }
-
-class DecodeResult<T> {
-  DecodeResult(this.value, this.bytesRead);
-  final T value;
-  final int bytesRead;
-}

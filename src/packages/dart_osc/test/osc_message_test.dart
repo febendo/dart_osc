@@ -42,7 +42,7 @@ void main() {
             pattern2.parts, equals(<String>['oscillator', '4', 'frequency']));
 
         final OscAddressPattern pattern3 = OscAddressPattern('/');
-        expect(pattern3.parts, equals([]));
+        expect(pattern3.parts, equals(<OscAddressPattern>[]));
       });
 
       test('should get method name correctly', () {
@@ -314,7 +314,7 @@ void main() {
             expect(roundTrip.typeTag, equals(original.typeTag));
 
             if (original.typeTag == 'f') {
-              expect(roundTrip.value, closeTo(original.value, 0.001));
+              expect(roundTrip.value, closeTo(original.value as num, 0.001));
             } else {
               expect(roundTrip.value, equals(original.value));
             }
