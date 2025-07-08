@@ -40,6 +40,22 @@ class OscArgument {
   /// Creates a blob argument (type tag 'b')
   factory OscArgument.blob(final Uint8List value) => OscArgument._('b', value);
 
+  /// Creates a blob argument from a List<int>
+  factory OscArgument.blobInt(final List<int> ints) {
+    final Uint8List uint8List = Uint8List.fromList(ints);
+    return OscArgument._('b', uint8List);
+  }
+
+  /// Creates a blob argument from a List<double>
+  factory OscArgument.blobDouble(final List<double> doubles) {
+    final ByteData byteData = ByteData(doubles.length * 8);
+    for (int i = 0; i < doubles.length; i++) {
+      byteData.setFloat64(i * 8, doubles[i]);
+    }
+    final Uint8List uint8List = byteData.buffer.asUint8List();
+    return OscArgument._('b', uint8List);
+  }
+
   /// Creates an int64 argument (type tag 'h') - extended type
   factory OscArgument.int64(final int value) => OscArgument._('h', value);
 

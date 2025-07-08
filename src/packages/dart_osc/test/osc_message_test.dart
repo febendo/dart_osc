@@ -147,6 +147,24 @@ void main() {
         expect(arg.value, equals(data));
       });
 
+      test('should create blob argument from int list', () {
+        final Uint8List data = Uint8List.fromList(<int>[1, 2, 3]);
+        final OscArgument arg = OscArgument.blobInt(<int>[1, 2, 3]);
+        expect(arg.typeTag, equals('b'));
+        expect(arg.value, equals(data));
+      });
+
+      test('should create blob argument from double list', () {
+        final List<double> data = <double>[1.2, 3.4, 4.5];
+        final ByteData byteData = ByteData(data.length * 8);
+        for (int i = 0; i < data.length; i++) {
+          byteData.setFloat64(i * 8, data[i]);
+        }
+        final OscArgument arg = OscArgument.blobDouble(data);
+        expect(arg.typeTag, equals('b'));
+        expect(arg.value, equals(byteData.buffer.asUint8List()));
+      });
+
       test('should create extended type arguments', () {
         expect(OscArgument.int64(123).typeTag, equals('h'));
         expect(OscArgument.double64(3.14).typeTag, equals('d'));
