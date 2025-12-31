@@ -120,9 +120,7 @@ await for (final packetData in stream) {
 ```
 
 ## Quick Start
-
 ### Creating and Encoding OSC Messages
-
 ```dart
 import 'package:dart_osc/dart_osc.dart';
 
@@ -145,7 +143,6 @@ final complexMessage = OscMessage('/synth/voice/1', [
 ```
 
 ### Decoding OSC Messages
-
 ```dart
 import 'dart:typed_data';
 
@@ -161,7 +158,6 @@ for (final arg in decodedMessage.arguments) {
 ```
 
 ### Working with OSC Bundles
-
 ```dart
 // Create messages
 final msg1 = OscMessage('/osc/1/freq', [OscArgument.float32(440.0)]);
@@ -184,7 +180,6 @@ final decodedBundle = OscBundle.decode(Uint8List.fromList(bundleBytes));
 ```
 
 ### Pattern Matching
-
 ```dart
 // Create address patterns with wildcards
 final pattern1 = OscAddressPattern('/oscillator/*/frequency');
@@ -202,9 +197,7 @@ print(pattern2.matches(address3)); // true
 ```
 
 ## Supported OSC Types
-
 ### Standard Types (OSC 1.0)
-
 | Type Tag | Dart Type | Description |
 |----------|-----------|-------------|
 | `i` | `int` | 32-bit signed integer |
@@ -213,7 +206,6 @@ print(pattern2.matches(address3)); // true
 | `b` | `Uint8List` | OSC-blob (size + data, 32-bit aligned) |
 
 ### Extended Types
-
 | Type Tag | Dart Type | Description |
 |----------|-----------|-------------|
 | `h` | `int` | 64-bit signed integer |
@@ -229,11 +221,9 @@ print(pattern2.matches(address3)); // true
 | `I` | `double` | Infinitum (infinity, no data) |
 
 ## Pattern Matching Features
-
 OSC address patterns support powerful matching capabilities:
 
 ### Wildcards
-
 ```dart
 // ? matches any single character
 final pattern1 = OscAddressPattern('/osc/?/freq');
@@ -249,7 +239,6 @@ pattern2.matches(OscAddress('/osc/anything123/freq')); // true
 ```
 
 ### Character Classes
-
 ```dart
 // [abc] matches any character in the set
 final pattern3 = OscAddressPattern('/voice/[123]/amp');
@@ -267,7 +256,6 @@ pattern5.matches(OscAddress('/voice/0/amp')); // false
 ```
 
 ### String Alternatives
-
 ```dart
 // {foo,bar} matches any of the alternatives
 final pattern6 = OscAddressPattern('/effects/{reverb,delay,chorus}/wet');
@@ -277,7 +265,6 @@ pattern6.matches(OscAddress('/effects/flanger/wet')); // false
 ```
 
 ## Time Tags
-
 OSC time tags use NTP timestamp format for precise timing:
 
 ```dart
@@ -305,9 +292,7 @@ print('Is before now: ${specificTime.isBefore(now)}');
 ```
 
 ## Network Features
-
 ### UDP Socket Options
-
 ```dart
 final socket = OscUdpSocket();
 await socket.bind(port: 9000);
@@ -322,7 +307,6 @@ socket.joinMulticast(InternetAddress('224.0.0.1'));
 ```
 
 ### Client/Server Pattern
-
 ```dart
 // OSC Server
 final server = OscUdpClient();
@@ -353,7 +337,6 @@ client.sendPacket(
 ```
 
 ### Error Handling
-
 ```dart
 final client = OscUdpClient();
 await client.listen(port: 9000);
@@ -371,9 +354,7 @@ client.onError.listen((error) {
 ```
 
 ## Advanced Usage
-
 ### Custom Packet Processing
-
 ```dart
 import 'dart:typed_data';
 
@@ -397,7 +378,6 @@ if (packet.isMessage) {
 ```
 
 ### Error Handling
-
 ```dart
 try {
   final message = OscMessage('/test', [
@@ -420,7 +400,6 @@ try {
 ```
 
 ### Bundle Constraints
-
 OSC bundles must follow timing constraints:
 
 ```dart
@@ -440,7 +419,6 @@ final parentBundle = OscBundle(parentTime, [childBundle]); // OK
 ```
 
 ## Architecture
-
 This library follows SOLID principles and clean architecture:
 
 - **Single Responsibility**: Each class has a focused purpose
@@ -450,7 +428,6 @@ This library follows SOLID principles and clean architecture:
 - **Dependency Inversion**: Abstractions over concrete implementations
 
 ### Key Classes
-
 **Core OSC:**
 - `OscPacket`: Abstract base for all OSC packets
 - `OscMessage`: OSC message implementation
@@ -467,7 +444,6 @@ This library follows SOLID principles and clean architecture:
 - `OscPacketEvent`/`OscErrorEvent`: Event objects for async communication
 
 ## Specification Compliance
-
 This implementation fully complies with the OSC 1.0 specification:
 
 - ✅ All atomic data types with proper 32-bit alignment
@@ -481,7 +457,6 @@ This implementation fully complies with the OSC 1.0 specification:
 - ✅ Support for multicast, broadcast, and streaming scenarios
 
 ## Contributing
-
 Contributions are welcome! Please feel free to submit a Pull Request. Make sure to:
 
 1. Follow the existing code style
@@ -491,15 +466,12 @@ Contributions are welcome! Please feel free to submit a Pull Request. Make sure 
 5. Check code analysis: `dart analyze`
 
 ## License
-
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## References
-
-- [OSC 1.0 Specification](https://opensoundcontrol.stanford.edu/spec-1_0.html)
+- [OSC 1.0 Specification](specification.md)
 - [OSC Website](https://opensoundcontrol.stanford.edu/)
 - [Dart Language](https://dart.dev/)
 
 ## Changelog
-
 See [CHANGELOG.md](CHANGELOG.md) for a detailed list of changes and version history.
