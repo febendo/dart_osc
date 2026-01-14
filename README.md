@@ -6,6 +6,8 @@ A comprehensive Dart implementation of the Open Sound Control (OSC) protocol spe
 [![Dart SDK Version](https://badgen.net/pub/sdk-version/dart_osc)](https://pub.dev/packages/dart_osc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+[![style: very good analysis](https://img.shields.io/badge/style-very_good_analysis-B22C89.svg)](https://pub.dev/packages/very_good_analysis)
+
 ## Features
 
 - ✅ **Complete OSC 1.0 Implementation**: Full support for the OSC specification
