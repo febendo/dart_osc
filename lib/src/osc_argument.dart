@@ -27,8 +27,8 @@ class OscArgument {
   /// Creates a string argument (type tag 's')
   factory OscArgument.string(final String value) {
     // Validate that string contains only ASCII characters
-    for (int i = 0; i < value.length; i++) {
-      final int codeUnit = value.codeUnitAt(i);
+    for (var i = 0; i < value.length; i++) {
+      final codeUnit = value.codeUnitAt(i);
       if (codeUnit > 127 || codeUnit == 0) {
         throw OscArgumentException(
           'OSC string must contain only non-null ASCII characters: "$value"',
@@ -43,17 +43,17 @@ class OscArgument {
 
   /// Creates a blob argument from a List<int>
   factory OscArgument.blobInt(final List<int> ints) {
-    final Uint8List uint8List = Uint8List.fromList(ints);
+    final uint8List = Uint8List.fromList(ints);
     return OscArgument._('b', uint8List);
   }
 
   /// Creates a blob argument from a List<double>
   factory OscArgument.blobDouble(final List<double> doubles) {
-    final ByteData byteData = ByteData(doubles.length * 8);
-    for (int i = 0; i < doubles.length; i++) {
+    final byteData = ByteData(doubles.length * 8);
+    for (var i = 0; i < doubles.length; i++) {
       byteData.setFloat64(i * 8, doubles[i]);
     }
-    final Uint8List uint8List = byteData.buffer.asUint8List();
+    final uint8List = byteData.buffer.asUint8List();
     return OscArgument._('b', uint8List);
   }
 
@@ -70,8 +70,8 @@ class OscArgument {
   /// Creates an alternate string argument (type tag 'S') - extended type
   factory OscArgument.symbol(final String value) {
     // Same validation as regular string
-    for (int i = 0; i < value.length; i++) {
-      final int codeUnit = value.codeUnitAt(i);
+    for (var i = 0; i < value.length; i++) {
+      final codeUnit = value.codeUnitAt(i);
       if (codeUnit > 127 || codeUnit == 0) {
         throw OscArgumentException(
           'OSC symbol must contain only non-null ASCII characters: "$value"',
@@ -88,7 +88,7 @@ class OscArgument {
         'char argument must be exactly one character: "$value"',
       );
     }
-    final int codeUnit = value.codeUnitAt(0);
+    final codeUnit = value.codeUnitAt(0);
     if (codeUnit > 127) {
       throw OscArgumentException('char argument must be ASCII: "$value"');
     }
@@ -166,7 +166,7 @@ class OscArgument {
       case 'r':
         return OscArgument.color(value as int);
       case 'm':
-        final List<int> midi = value as List<int>;
+        final midi = value as List<int>;
         return OscArgument.midi(midi[0], midi[1], midi[2], midi[3]);
       case 'T':
         return OscArgument.true_();
@@ -203,18 +203,18 @@ class OscArgument {
 
     // Special handling for blobs and MIDI messages
     if (typeTag == 'b') {
-      final Uint8List thisBlob = value as Uint8List;
-      final Uint8List otherBlob = other.value as Uint8List;
+      final thisBlob = value as Uint8List;
+      final otherBlob = other.value as Uint8List;
       if (thisBlob.length != otherBlob.length) return false;
-      for (int i = 0; i < thisBlob.length; i++) {
+      for (var i = 0; i < thisBlob.length; i++) {
         if (thisBlob[i] != otherBlob[i]) return false;
       }
       return true;
     }
 
     if (typeTag == 'm') {
-      final List<int> thisMidi = value as List<int>;
-      final List<int> otherMidi = other.value as List<int>;
+      final thisMidi = value as List<int>;
+      final otherMidi = other.value as List<int>;
       return thisMidi.length == otherMidi.length &&
           thisMidi[0] == otherMidi[0] &&
           thisMidi[1] == otherMidi[1] &&
@@ -238,7 +238,7 @@ class OscArgument {
       case 's':
         return 'OscArgument.string("$value")';
       case 'b':
-        final Uint8List blob = value as Uint8List;
+        final blob = value as Uint8List;
         return 'OscArgument.blob(${blob.length} bytes)';
       case 'h':
         return 'OscArgument.int64($value)';
@@ -253,7 +253,7 @@ class OscArgument {
       case 'r':
         return 'OscArgument.color(0x${(value as int).toRadixString(16).toUpperCase().padLeft(8, '0')})';
       case 'm':
-        final List<int> midi = value as List<int>;
+        final midi = value as List<int>;
         return 'OscArgument.midi(${midi[0]}, ${midi[1]}, ${midi[2]}, ${midi[3]})';
       case 'T':
         return 'OscArgument.true_()';

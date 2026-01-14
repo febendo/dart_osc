@@ -24,8 +24,8 @@ class OscDecoder {
       );
     }
 
-    final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 4);
-    final int value = byteData.getInt32(0);
+    final byteData = ByteData.sublistView(bytes, offset, offset + 4);
+    final value = byteData.getInt32(0);
     return DecodeResult(value, 4);
   }
 
@@ -37,8 +37,8 @@ class OscDecoder {
       );
     }
 
-    final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 4);
-    final double value = byteData.getFloat32(0);
+    final byteData = ByteData.sublistView(bytes, offset, offset + 4);
+    final value = byteData.getFloat32(0);
     return DecodeResult(value, 4);
   }
 
@@ -51,8 +51,8 @@ class OscDecoder {
     }
 
     // Find the null terminator
-    int nullIndex = -1;
-    for (int i = offset; i < bytes.length; i++) {
+    var nullIndex = -1;
+    for (var i = offset; i < bytes.length; i++) {
       if (bytes[i] == 0) {
         nullIndex = i;
         break;
@@ -66,21 +66,22 @@ class OscDecoder {
     }
 
     // Extract the string bytes (excluding null terminator)
-    final Uint8List stringBytes = bytes.sublist(offset, nullIndex);
+    final stringBytes = bytes.sublist(offset, nullIndex);
 
     // Validate ASCII
-    for (final int byte in stringBytes) {
+    for (final byte in stringBytes) {
       if (byte > 127) {
-        throw OscDecodingException('Non-ASCII character found in OSC string');
+        throw const OscDecodingException(
+            'Non-ASCII character found in OSC string');
       }
     }
 
-    final String string = utf8.decode(stringBytes);
+    final string = utf8.decode(stringBytes);
 
     // Calculate total bytes read including padding to 32-bit boundary
-    final int stringLength = nullIndex - offset + 1; // +1 for null terminator
-    final int padding = (4 - (stringLength % 4)) % 4;
-    final int totalBytes = stringLength + padding;
+    final stringLength = nullIndex - offset + 1; // +1 for null terminator
+    final padding = (4 - (stringLength % 4)) % 4;
+    final totalBytes = stringLength + padding;
 
     // Validate we have enough bytes for the padding
     if (bytes.length < offset + totalBytes) {
@@ -95,18 +96,18 @@ class OscDecoder {
   /// Decodes an OSC-blob with size prefix and 32-bit alignment padding
   DecodeResult<Uint8List> decodeBlob(final Uint8List bytes, final int offset) {
     // First decode the size
-    final DecodeResult<int> sizeResult = decodeInt32(bytes, offset);
-    final int size = sizeResult.value;
+    final sizeResult = decodeInt32(bytes, offset);
+    final size = sizeResult.value;
 
     if (size < 0) {
       throw OscDecodingException('Invalid blob size: $size');
     }
 
-    final int dataOffset = offset + 4;
+    final dataOffset = offset + 4;
 
     // Calculate padding needed for 32-bit alignment
-    final int padding = (4 - (size % 4)) % 4;
-    final int totalDataBytes = size + padding;
+    final padding = (4 - (size % 4)) % 4;
+    final totalDataBytes = size + padding;
 
     if (bytes.length < dataOffset + totalDataBytes) {
       throw OscDecodingException(
@@ -115,7 +116,7 @@ class OscDecoder {
     }
 
     // Extract the actual data (without padding)
-    final Uint8List data = Uint8List.fromList(
+    final data = Uint8List.fromList(
       bytes.sublist(dataOffset, dataOffset + size),
     );
 
@@ -133,9 +134,9 @@ class OscDecoder {
       );
     }
 
-    final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 8);
-    final int ntpTimestamp = byteData.getUint64(0);
-    final OscTimeTag timeTag = OscTimeTag.fromNtpTimestamp(ntpTimestamp);
+    final byteData = ByteData.sublistView(bytes, offset, offset + 8);
+    final ntpTimestamp = byteData.getUint64(0);
+    final timeTag = OscTimeTag.fromNtpTimestamp(ntpTimestamp);
 
     return DecodeResult(timeTag, 8);
   }
@@ -148,8 +149,8 @@ class OscDecoder {
       );
     }
 
-    final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 8);
-    final int value = byteData.getInt64(0);
+    final byteData = ByteData.sublistView(bytes, offset, offset + 8);
+    final value = byteData.getInt64(0);
     return DecodeResult(value, 8);
   }
 
@@ -161,8 +162,8 @@ class OscDecoder {
       );
     }
 
-    final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 8);
-    final double value = byteData.getFloat64(0);
+    final byteData = ByteData.sublistView(bytes, offset, offset + 8);
+    final value = byteData.getFloat64(0);
     return DecodeResult(value, 8);
   }
 
@@ -174,14 +175,14 @@ class OscDecoder {
       );
     }
 
-    final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 4);
-    final int codeUnit = byteData.getUint32(0);
+    final byteData = ByteData.sublistView(bytes, offset, offset + 4);
+    final codeUnit = byteData.getUint32(0);
 
     if (codeUnit > 127) {
       throw OscDecodingException('Invalid ASCII character code: $codeUnit');
     }
 
-    final String char = String.fromCharCode(codeUnit);
+    final char = String.fromCharCode(codeUnit);
     return DecodeResult(char, 4);
   }
 
@@ -193,8 +194,8 @@ class OscDecoder {
       );
     }
 
-    final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 4);
-    final int rgba = byteData.getUint32(0);
+    final byteData = ByteData.sublistView(bytes, offset, offset + 4);
+    final rgba = byteData.getUint32(0);
     return DecodeResult(rgba, 4);
   }
 
@@ -206,10 +207,10 @@ class OscDecoder {
       );
     }
 
-    final int portId = bytes[offset];
-    final int statusByte = bytes[offset + 1];
-    final int data1 = bytes[offset + 2];
-    final int data2 = bytes[offset + 3];
+    final portId = bytes[offset];
+    final statusByte = bytes[offset + 1];
+    final data1 = bytes[offset + 2];
+    final data2 = bytes[offset + 3];
 
     return DecodeResult(<int>[portId, statusByte, data1, data2], 4);
   }
@@ -230,5 +231,6 @@ class OscDecoder {
   DecodeResult<double> decodeInfinitum(
     final Uint8List bytes,
     final int offset,
-  ) => const DecodeResult(double.infinity, 0);
+  ) =>
+      const DecodeResult(double.infinity, 0);
 }

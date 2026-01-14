@@ -21,20 +21,19 @@ class OscTimeTag {
   /// vs NTP's ~200 picosecond resolution
   factory OscTimeTag.fromDateTime(final DateTime dateTime) {
     // Convert to UTC if not already
-    final DateTime utc = dateTime.toUtc();
+    final utc = dateTime.toUtc();
 
     // Calculate seconds since NTP epoch (1900)
-    final int secondsSince1970 = utc.millisecondsSinceEpoch ~/ 1000;
-    final int ntpSeconds = secondsSince1970 + _ntpEpochOffset;
+    final secondsSince1970 = utc.millisecondsSinceEpoch ~/ 1000;
+    final ntpSeconds = secondsSince1970 + _ntpEpochOffset;
 
     // Calculate fractional seconds from microseconds
-    final int microseconds = utc.microsecond;
-    final double fractionOfSecond =
-        (microseconds * 1000) /
+    final microseconds = utc.microsecond;
+    final fractionOfSecond = (microseconds * 1000) /
         1000000.0; // Convert to nanoseconds then to fraction
-    final int ntpFraction = (fractionOfSecond * 0x100000000).round();
+    final ntpFraction = (fractionOfSecond * 0x100000000).round();
 
-    final int ntpTimestamp = (ntpSeconds << 32) | ntpFraction;
+    final ntpTimestamp = (ntpSeconds << 32) | ntpFraction;
     return OscTimeTag.fromNtpTimestamp(ntpTimestamp);
   }
 
@@ -57,15 +56,15 @@ class OscTimeTag {
     if (isImmediate) return null;
 
     // Extract seconds and fraction
-    final int ntpSeconds = (ntpTimestamp >> 32) & 0xFFFFFFFF;
-    final int ntpFraction = ntpTimestamp & 0xFFFFFFFF;
+    final ntpSeconds = (ntpTimestamp >> 32) & 0xFFFFFFFF;
+    final ntpFraction = ntpTimestamp & 0xFFFFFFFF;
 
     // Convert NTP seconds to Unix seconds
-    final int unixSeconds = ntpSeconds - _ntpEpochOffset;
+    final unixSeconds = ntpSeconds - _ntpEpochOffset;
 
     // Convert fraction to microseconds
-    final double fractionOfSecond = ntpFraction / 0x100000000;
-    final int microseconds = (fractionOfSecond * 1000000).round();
+    final fractionOfSecond = ntpFraction / 0x100000000;
+    final microseconds = (fractionOfSecond * 1000000).round();
 
     return DateTime.fromMillisecondsSinceEpoch(
       unixSeconds * 1000 + (microseconds ~/ 1000),
@@ -91,7 +90,7 @@ class OscTimeTag {
     if (isImmediate) {
       return 'OscTimeTag.immediate()';
     }
-    final DateTime? dateTime = toDateTime();
+    final dateTime = toDateTime();
     return 'OscTimeTag(${dateTime?.toIso8601String() ?? 'null'})';
   }
 

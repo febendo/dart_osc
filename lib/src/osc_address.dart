@@ -9,8 +9,8 @@ library;
 class OscAddress {
   /// Creates an OSC Address from a string representation
   OscAddress(final String address)
-    : _address = address,
-      _parts = _parseAddress(address) {
+      : _address = address,
+        _parts = _parseAddress(address) {
     _validateAddress(address);
   }
   final String _address;
@@ -23,7 +23,7 @@ class OscAddress {
     }
 
     // Check for forbidden characters
-    const Set<String> forbiddenChars = <String>{
+    const forbiddenChars = <String>{
       ' ',
       '#',
       '*',
@@ -35,8 +35,8 @@ class OscAddress {
       '}',
     };
 
-    for (int i = 0; i < address.length; i++) {
-      final String char = address[i];
+    for (var i = 0; i < address.length; i++) {
+      final char = address[i];
       if (forbiddenChars.contains(char)) {
         throw ArgumentError(
           'OSC Address contains forbidden character "$char": "$address"',
@@ -44,7 +44,7 @@ class OscAddress {
       }
 
       // Check ASCII range (printable characters)
-      final int codeUnit = address.codeUnitAt(i);
+      final codeUnit = address.codeUnitAt(i);
       if (codeUnit < 32 || codeUnit > 126) {
         throw ArgumentError(
           'OSC Address contains non-printable character: "$address"',
@@ -60,7 +60,7 @@ class OscAddress {
     }
 
     // Remove leading slash and split by '/'
-    final String withoutLeadingSlash = address.substring(1);
+    final withoutLeadingSlash = address.substring(1);
     if (withoutLeadingSlash.isEmpty) {
       return <String>[];
     }
@@ -87,7 +87,7 @@ class OscAddress {
     if (_parts.isEmpty) return null;
     if (_parts.length == 1) return OscAddress('/');
 
-    final List<String> parentParts = _parts.sublist(0, _parts.length - 1);
+    final parentParts = _parts.sublist(0, _parts.length - 1);
     return OscAddress('/${parentParts.join('/')}');
   }
 
@@ -104,7 +104,7 @@ class OscAddress {
       return false;
     }
 
-    for (int i = 0; i < parent._parts.length; i++) {
+    for (var i = 0; i < parent._parts.length; i++) {
       if (_parts[i] != parent._parts[i]) {
         return false;
       }
@@ -123,7 +123,7 @@ class OscAddress {
       return false;
     }
 
-    for (int i = 0; i < ancestor._parts.length; i++) {
+    for (var i = 0; i < ancestor._parts.length; i++) {
       if (_parts[i] != ancestor._parts[i]) {
         return false;
       }
@@ -149,7 +149,7 @@ class OscAddress {
       throw ArgumentError('Address part cannot be empty');
     }
 
-    const Set<String> forbiddenChars = <String>{
+    const forbiddenChars = <String>{
       ' ',
       '#',
       '*',
@@ -162,15 +162,15 @@ class OscAddress {
       '}',
     };
 
-    for (int i = 0; i < part.length; i++) {
-      final String char = part[i];
+    for (var i = 0; i < part.length; i++) {
+      final char = part[i];
       if (forbiddenChars.contains(char)) {
         throw ArgumentError(
           'Address part contains forbidden character "$char": "$part"',
         );
       }
 
-      final int codeUnit = part.codeUnitAt(i);
+      final codeUnit = part.codeUnitAt(i);
       if (codeUnit < 32 || codeUnit > 126) {
         throw ArgumentError(
           'Address part contains non-printable character: "$part"',

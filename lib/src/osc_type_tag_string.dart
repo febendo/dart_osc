@@ -11,9 +11,7 @@ import 'package:dart_osc/src/osc_exceptions.dart';
 class OscTypeTagString {
   /// Creates a type tag string from a list of OSC arguments
   factory OscTypeTagString(final List<OscArgument> arguments) {
-    final List<String> tags = arguments
-        .map((final arg) => arg.typeTag)
-        .toList();
+    final tags = arguments.map((final arg) => arg.typeTag).toList();
     return OscTypeTagString._(tags);
   }
 
@@ -28,9 +26,9 @@ class OscTypeTagString {
       );
     }
 
-    final List<String> tags = <String>[];
-    for (int i = 1; i < typeTagString.length; i++) {
-      final String char = typeTagString[i];
+    final tags = <String>[];
+    for (var i = 1; i < typeTagString.length; i++) {
+      final char = typeTagString[i];
       if (char == '\x00') break; // Stop at null terminator
       tags.add(char);
     }
@@ -59,7 +57,7 @@ class OscTypeTagString {
 
   /// Validates that all type tags are recognized OSC types
   void validate() {
-    for (final String tag in tags) {
+    for (final tag in tags) {
       if (!_isValidTypeTag(tag)) {
         throw OscFormatException('Unrecognized OSC type tag: "$tag"');
       }
@@ -71,10 +69,10 @@ class OscTypeTagString {
     if (tag.length != 1) return false;
 
     // Standard OSC 1.0 types
-    const Set<String> standardTags = <String>{'i', 'f', 's', 'b'};
+    const standardTags = <String>{'i', 'f', 's', 'b'};
 
     // Extended types from the specification
-    const Set<String> extendedTags = <String>{
+    const extendedTags = <String>{
       'h',
       't',
       'd',
@@ -102,7 +100,7 @@ class OscTypeTagString {
     if (other is! OscTypeTagString) return false;
     if (tags.length != other.tags.length) return false;
 
-    for (int i = 0; i < tags.length; i++) {
+    for (var i = 0; i < tags.length; i++) {
       if (tags[i] != other.tags[i]) return false;
     }
 

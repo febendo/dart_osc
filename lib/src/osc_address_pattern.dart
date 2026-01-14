@@ -16,8 +16,8 @@ import 'package:dart_osc/src/osc_address.dart';
 class OscAddressPattern {
   /// Creates an OSC Address Pattern from a string representation
   OscAddressPattern(final String pattern)
-    : _pattern = pattern,
-      _parts = _parsePattern(pattern) {
+      : _pattern = pattern,
+        _parts = _parsePattern(pattern) {
     _validatePattern(pattern);
   }
   final String _pattern;
@@ -41,11 +41,11 @@ class OscAddressPattern {
 
   /// Validates forbidden characters outside of valid pattern contexts
   static void _validateForbiddenCharacters(final String pattern) {
-    bool inBraces = false;
-    const Set<String> forbiddenChars = <String>{' ', '#'};
+    var inBraces = false;
+    const forbiddenChars = <String>{' ', '#'};
 
-    for (int i = 0; i < pattern.length; i++) {
-      final String char = pattern[i];
+    for (var i = 0; i < pattern.length; i++) {
+      final char = pattern[i];
 
       // Track brace context
       if (char == '{') {
@@ -69,7 +69,7 @@ class OscAddressPattern {
       }
 
       // Check ASCII range (printable characters)
-      final int codeUnit = pattern.codeUnitAt(i);
+      final codeUnit = pattern.codeUnitAt(i);
       if (codeUnit < 32 || codeUnit > 126) {
         throw ArgumentError(
           'OSC Address Pattern contains non-printable character: "$pattern"',
@@ -80,12 +80,12 @@ class OscAddressPattern {
 
   /// Validates that brackets are properly matched and formed
   static void _validateBrackets(final String pattern) {
-    int bracketDepth = 0;
-    bool inBrackets = false;
-    int bracketStart = -1;
+    var bracketDepth = 0;
+    var inBrackets = false;
+    var bracketStart = -1;
 
-    for (int i = 0; i < pattern.length; i++) {
-      final String char = pattern[i];
+    for (var i = 0; i < pattern.length; i++) {
+      final char = pattern[i];
 
       if (char == '[' && !inBrackets) {
         inBrackets = true;
@@ -96,7 +96,7 @@ class OscAddressPattern {
         bracketDepth--;
 
         // Validate the content of the bracket
-        final String bracketContent = pattern.substring(bracketStart + 1, i);
+        final bracketContent = pattern.substring(bracketStart + 1, i);
         if (bracketContent.isEmpty) {
           throw FormatException(
             'Empty character class not allowed: "$pattern"',
@@ -122,10 +122,10 @@ class OscAddressPattern {
     final String fullPattern,
   ) {
     // Check for invalid ranges (e.g., z-a, 9-0)
-    for (int i = 0; i < content.length - 2; i++) {
+    for (var i = 0; i < content.length - 2; i++) {
       if (content[i + 1] == '-' && i + 2 < content.length) {
-        final int start = content.codeUnitAt(i);
-        final int end = content.codeUnitAt(i + 2);
+        final start = content.codeUnitAt(i);
+        final end = content.codeUnitAt(i + 2);
         if (start > end) {
           throw FormatException(
             'Invalid character range: "${content[i]}-${content[i + 2]}" in "$fullPattern"',
@@ -137,11 +137,11 @@ class OscAddressPattern {
 
   /// Validates that braces are properly matched
   static void _validateBraces(final String pattern) {
-    int braceDepth = 0;
-    bool inBraces = false;
+    var braceDepth = 0;
+    var inBraces = false;
 
-    for (int i = 0; i < pattern.length; i++) {
-      final String char = pattern[i];
+    for (var i = 0; i < pattern.length; i++) {
+      final char = pattern[i];
 
       if (char == '{' && !inBraces) {
         inBraces = true;
@@ -168,7 +168,7 @@ class OscAddressPattern {
     }
 
     // Remove leading slash and split by '/'
-    final String withoutLeadingSlash = pattern.substring(1);
+    final withoutLeadingSlash = pattern.substring(1);
     if (withoutLeadingSlash.isEmpty) {
       return <String>[];
     }
@@ -194,7 +194,7 @@ class OscAddressPattern {
     }
 
     // Each part must match
-    for (int i = 0; i < _parts.length; i++) {
+    for (var i = 0; i < _parts.length; i++) {
       if (!_matchesPart(_parts[i], address.parts[i])) {
         return false;
       }
@@ -222,7 +222,7 @@ class OscAddressPattern {
       return false; // Pattern exhausted but address remains
     }
 
-    final String patternChar = pattern[patternIndex];
+    final patternChar = pattern[patternIndex];
 
     // Handle different pattern characters
     switch (patternChar) {
@@ -259,14 +259,14 @@ class OscAddressPattern {
       case '[':
         // Character class
         if (addressIndex >= address.length) return false;
-        final int classEnd = pattern.indexOf(']', patternIndex);
+        final classEnd = pattern.indexOf(']', patternIndex);
         if (classEnd == -1) return false;
 
-        final String classContent = pattern.substring(
+        final classContent = pattern.substring(
           patternIndex + 1,
           classEnd,
         );
-        final String addressChar = address[addressIndex];
+        final addressChar = address[addressIndex];
 
         if (_matchesCharacterClass(classContent, addressChar)) {
           return _matchesPattern(
@@ -280,15 +280,13 @@ class OscAddressPattern {
 
       case '{':
         // String alternatives
-        final int braceEnd = pattern.indexOf('}', patternIndex);
+        final braceEnd = pattern.indexOf('}', patternIndex);
         if (braceEnd == -1) return false;
 
-        final List<String> alternatives = pattern
-            .substring(patternIndex + 1, braceEnd)
-            .split(',');
-        for (final String alternative in alternatives) {
-          final String testPattern =
-              pattern.substring(0, patternIndex) +
+        final alternatives =
+            pattern.substring(patternIndex + 1, braceEnd).split(',');
+        for (final alternative in alternatives) {
+          final testPattern = pattern.substring(0, patternIndex) +
               alternative +
               pattern.substring(braceEnd + 1);
           if (_matchesPattern(
@@ -324,9 +322,9 @@ class OscAddressPattern {
   ) {
     if (char.length != 1) return false;
 
-    final int charCode = char.codeUnitAt(0);
-    bool negated = false;
-    String content = classContent;
+    final charCode = char.codeUnitAt(0);
+    var negated = false;
+    var content = classContent;
 
     // Check for negation
     if (content.startsWith('!')) {
@@ -334,14 +332,14 @@ class OscAddressPattern {
       content = content.substring(1);
     }
 
-    bool matches = false;
+    var matches = false;
 
     // Process character class content
-    for (int i = 0; i < content.length; i++) {
+    for (var i = 0; i < content.length; i++) {
       if (i + 2 < content.length && content[i + 1] == '-') {
         // Range
-        final int startCode = content.codeUnitAt(i);
-        final int endCode = content.codeUnitAt(i + 2);
+        final startCode = content.codeUnitAt(i);
+        final endCode = content.codeUnitAt(i + 2);
         if (charCode >= startCode && charCode <= endCode) {
           matches = true;
           break;

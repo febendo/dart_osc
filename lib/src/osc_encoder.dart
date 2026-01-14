@@ -15,14 +15,14 @@ class OscEncoder {
       throw OscEncodingException('int32 value out of range: $value');
     }
 
-    final ByteData bytes = ByteData(4);
+    final bytes = ByteData(4);
     bytes.setInt32(0, value);
     return bytes.buffer.asUint8List();
   }
 
   /// Encodes a 32-bit IEEE 754 floating point number in big-endian format
   List<int> encodeFloat32(final double value) {
-    final ByteData bytes = ByteData(4);
+    final bytes = ByteData(4);
     bytes.setFloat32(0, value);
     return bytes.buffer.asUint8List();
   }
@@ -30,8 +30,8 @@ class OscEncoder {
   /// Encodes an OSC-string with null termination and 32-bit alignment padding
   List<int> encodeString(final String value) {
     // Validate that string contains only ASCII characters
-    for (int i = 0; i < value.length; i++) {
-      final int codeUnit = value.codeUnitAt(i);
+    for (var i = 0; i < value.length; i++) {
+      final codeUnit = value.codeUnitAt(i);
       if (codeUnit > 127 || codeUnit == 0) {
         throw ArgumentError(
           'OSC-string must contain only non-null ASCII characters: "$value"',
@@ -40,14 +40,14 @@ class OscEncoder {
     }
 
     // Convert to UTF-8 bytes (which is ASCII for valid input)
-    final Uint8List stringBytes = utf8.encode(value);
+    final stringBytes = utf8.encode(value);
 
     // Add null terminator
-    final List<int> nullTerminated = <int>[...stringBytes, 0];
+    final nullTerminated = <int>[...stringBytes, 0];
 
     // Pad to 32-bit boundary
-    final int padding = (4 - (nullTerminated.length % 4)) % 4;
-    final List<int> padded = <int>[
+    final padding = (4 - (nullTerminated.length % 4)) % 4;
+    final padded = <int>[
       ...nullTerminated,
       ...List.filled(padding, 0),
     ];
@@ -57,33 +57,33 @@ class OscEncoder {
 
   /// Encodes an OSC-blob with size prefix and 32-bit alignment padding
   List<int> encodeBlob(final Uint8List data) {
-    final int size = data.length;
-    final List<int> sizeBytes = encodeInt32(size);
+    final size = data.length;
+    final sizeBytes = encodeInt32(size);
 
     // Calculate padding needed for 32-bit alignment
-    final int padding = (4 - (size % 4)) % 4;
-    final List<int> paddedData = <int>[...data, ...List.filled(padding, 0)];
+    final padding = (4 - (size % 4)) % 4;
+    final paddedData = <int>[...data, ...List.filled(padding, 0)];
 
     return <int>[...sizeBytes, ...paddedData];
   }
 
   /// Encodes an OSC time tag as a 64-bit big-endian value
   List<int> encodeTimeTag(final OscTimeTag timeTag) {
-    final ByteData bytes = ByteData(8);
+    final bytes = ByteData(8);
     bytes.setUint64(0, timeTag.ntpTimestamp);
     return bytes.buffer.asUint8List();
   }
 
   /// Encodes a 64-bit signed integer in big-endian format (extended type)
   List<int> encodeInt64(final int value) {
-    final ByteData bytes = ByteData(8);
+    final bytes = ByteData(8);
     bytes.setInt64(0, value);
     return bytes.buffer.asUint8List();
   }
 
   /// Encodes a 64-bit IEEE 754 double precision floating point number in big-endian format (extended type)
   List<int> encodeDouble64(final double value) {
-    final ByteData bytes = ByteData(8);
+    final bytes = ByteData(8);
     bytes.setFloat64(0, value);
     return bytes.buffer.asUint8List();
   }
@@ -94,12 +94,12 @@ class OscEncoder {
       throw ArgumentError('char must be exactly one character: "$char"');
     }
 
-    final int codeUnit = char.codeUnitAt(0);
+    final codeUnit = char.codeUnitAt(0);
     if (codeUnit > 127) {
       throw ArgumentError('char must be ASCII: "$char"');
     }
 
-    final ByteData bytes = ByteData(4);
+    final bytes = ByteData(4);
     bytes.setUint32(0, codeUnit);
     return bytes.buffer.asUint8List();
   }
@@ -112,7 +112,7 @@ class OscEncoder {
       );
     }
 
-    final ByteData bytes = ByteData(4);
+    final bytes = ByteData(4);
     bytes.setUint32(0, rgba);
     return bytes.buffer.asUint8List();
   }

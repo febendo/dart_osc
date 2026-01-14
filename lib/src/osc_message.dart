@@ -21,7 +21,7 @@ import 'package:dart_osc/src/osc_type_tag_string.dart';
 class OscMessage extends OscPacket {
   /// Creates an OSC Message with the given address pattern and arguments
   OscMessage(final String addressPattern, this.arguments)
-    : addressPattern = OscAddressPattern(addressPattern) {
+      : addressPattern = OscAddressPattern(addressPattern) {
     typeTagString = OscTypeTagString(arguments);
   }
 
@@ -44,8 +44,8 @@ class OscMessage extends OscPacket {
   /// Encodes this message to its binary representation
   @override
   List<int> encode() {
-    final OscEncoder encoder = OscEncoder();
-    final List<int> bytes = <int>[];
+    final encoder = OscEncoder();
+    final bytes = <int>[];
 
     // Encode address pattern
     bytes.addAll(encoder.encodeString(addressPattern.toString()));
@@ -54,7 +54,7 @@ class OscMessage extends OscPacket {
     bytes.addAll(encoder.encodeString(typeTagString.toString()));
 
     // Encode arguments
-    for (final OscArgument argument in arguments) {
+    for (final argument in arguments) {
       bytes.addAll(_encodeArgument(encoder, argument));
     }
 
@@ -90,7 +90,7 @@ class OscMessage extends OscPacket {
       case 'r':
         return encoder.encodeColor(argument.value as int);
       case 'm':
-        final List<int> midi = argument.value as List<int>;
+        final midi = argument.value as List<int>;
         return encoder.encodeMidi(midi[0], midi[1], midi[2], midi[3]);
       case 'T':
         return encoder.encodeTrue();
@@ -109,27 +109,27 @@ class OscMessage extends OscPacket {
 
   /// Decodes an OSC Message from binary data
   static OscMessage decode(final Uint8List bytes) {
-    final OscDecoder decoder = OscDecoder();
-    int offset = 0;
+    final decoder = OscDecoder();
+    var offset = 0;
 
     // Decode address pattern
-    final DecodeResult<String> addressResult = decoder.decodeString(
+    final addressResult = decoder.decodeString(
       bytes,
       offset,
     );
-    final OscAddressPattern addressPattern = OscAddressPattern(
+    final addressPattern = OscAddressPattern(
       addressResult.value,
     );
     offset += addressResult.bytesRead;
 
     // Try to decode type tag string (may be missing in legacy implementations)
     OscTypeTagString? typeTagString;
-    List<OscArgument> arguments = <OscArgument>[];
+    var arguments = <OscArgument>[];
 
     if (offset < bytes.length) {
       // Peek at the next string to see if it starts with comma
       try {
-        final DecodeResult<String> typeTagResult = decoder.decodeString(
+        final typeTagResult = decoder.decodeString(
           bytes,
           offset,
         );
@@ -162,17 +162,17 @@ class OscMessage extends OscPacket {
     final int startOffset,
     final OscTypeTagString typeTagString,
   ) {
-    final List<OscArgument> arguments = <OscArgument>[];
-    int offset = startOffset;
+    final arguments = <OscArgument>[];
+    var offset = startOffset;
 
-    for (final String typeTag in typeTagString.tags) {
+    for (final typeTag in typeTagString.tags) {
       if (offset >= bytes.length) {
         throw OscDecodingException(
           'Insufficient data for argument with type tag: $typeTag',
         );
       }
 
-      final ({OscArgument argument, int bytesRead}) argument = _decodeArgument(
+      final argument = _decodeArgument(
         decoder,
         bytes,
         offset,
@@ -194,13 +194,13 @@ class OscMessage extends OscPacket {
   ) {
     switch (typeTag) {
       case 'i':
-        final DecodeResult<int> result = decoder.decodeInt32(bytes, offset);
+        final result = decoder.decodeInt32(bytes, offset);
         return (
           argument: OscArgument.int32(result.value),
           bytesRead: result.bytesRead,
         );
       case 'f':
-        final DecodeResult<double> result = decoder.decodeFloat32(
+        final result = decoder.decodeFloat32(
           bytes,
           offset,
         );
@@ -209,13 +209,13 @@ class OscMessage extends OscPacket {
           bytesRead: result.bytesRead,
         );
       case 's':
-        final DecodeResult<String> result = decoder.decodeString(bytes, offset);
+        final result = decoder.decodeString(bytes, offset);
         return (
           argument: OscArgument.string(result.value),
           bytesRead: result.bytesRead,
         );
       case 'b':
-        final DecodeResult<Uint8List> result = decoder.decodeBlob(
+        final result = decoder.decodeBlob(
           bytes,
           offset,
         );
@@ -224,13 +224,13 @@ class OscMessage extends OscPacket {
           bytesRead: result.bytesRead,
         );
       case 'h':
-        final DecodeResult<int> result = decoder.decodeInt64(bytes, offset);
+        final result = decoder.decodeInt64(bytes, offset);
         return (
           argument: OscArgument.int64(result.value),
           bytesRead: result.bytesRead,
         );
       case 't':
-        final DecodeResult<OscTimeTag> result = decoder.decodeTimeTag(
+        final result = decoder.decodeTimeTag(
           bytes,
           offset,
         );
@@ -239,7 +239,7 @@ class OscMessage extends OscPacket {
           bytesRead: result.bytesRead,
         );
       case 'd':
-        final DecodeResult<double> result = decoder.decodeDouble64(
+        final result = decoder.decodeDouble64(
           bytes,
           offset,
         );
@@ -248,44 +248,44 @@ class OscMessage extends OscPacket {
           bytesRead: result.bytesRead,
         );
       case 'S':
-        final DecodeResult<String> result = decoder.decodeString(bytes, offset);
+        final result = decoder.decodeString(bytes, offset);
         return (
           argument: OscArgument.symbol(result.value),
           bytesRead: result.bytesRead,
         );
       case 'c':
-        final DecodeResult<String> result = decoder.decodeChar(bytes, offset);
+        final result = decoder.decodeChar(bytes, offset);
         return (
           argument: OscArgument.char(result.value),
           bytesRead: result.bytesRead,
         );
       case 'r':
-        final DecodeResult<int> result = decoder.decodeColor(bytes, offset);
+        final result = decoder.decodeColor(bytes, offset);
         return (
           argument: OscArgument.color(result.value),
           bytesRead: result.bytesRead,
         );
       case 'm':
-        final DecodeResult<List<int>> result = decoder.decodeMidi(
+        final result = decoder.decodeMidi(
           bytes,
           offset,
         );
-        final List<int> midi = result.value;
+        final midi = result.value;
         return (
           argument: OscArgument.midi(midi[0], midi[1], midi[2], midi[3]),
           bytesRead: result.bytesRead,
         );
       case 'T':
-        final DecodeResult<bool> result = decoder.decodeTrue(bytes, offset);
+        final result = decoder.decodeTrue(bytes, offset);
         return (argument: OscArgument.true_(), bytesRead: result.bytesRead);
       case 'F':
-        final DecodeResult<bool> result = decoder.decodeFalse(bytes, offset);
+        final result = decoder.decodeFalse(bytes, offset);
         return (argument: OscArgument.false_(), bytesRead: result.bytesRead);
       case 'N':
-        final DecodeResult<void> result = decoder.decodeNil(bytes, offset);
+        final result = decoder.decodeNil(bytes, offset);
         return (argument: OscArgument.nil(), bytesRead: result.bytesRead);
       case 'I':
-        final DecodeResult<double> result = decoder.decodeInfinitum(
+        final result = decoder.decodeInfinitum(
           bytes,
           offset,
         );
@@ -302,7 +302,7 @@ class OscMessage extends OscPacket {
     if (addressPattern != other.addressPattern) return false;
     if (arguments.length != other.arguments.length) return false;
 
-    for (int i = 0; i < arguments.length; i++) {
+    for (var i = 0; i < arguments.length; i++) {
       if (arguments[i] != other.arguments[i]) return false;
     }
 
@@ -314,9 +314,7 @@ class OscMessage extends OscPacket {
 
   @override
   String toString() {
-    final String argStrings = arguments
-        .map((final arg) => arg.toString())
-        .join(', ');
+    final argStrings = arguments.map((final arg) => arg.toString()).join(', ');
     return 'OscMessage($addressPattern, [$argStrings])';
   }
 }

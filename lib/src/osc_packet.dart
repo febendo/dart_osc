@@ -37,7 +37,7 @@ abstract class OscPacket {
   /// the packet is a message or bundle and returns the appropriate type.
   static OscPacket decode(final Uint8List bytes) {
     if (bytes.isEmpty) {
-      throw FormatException('Empty packet data');
+      throw const FormatException('Empty packet data');
     }
 
     // Check first byte to distinguish between message and bundle

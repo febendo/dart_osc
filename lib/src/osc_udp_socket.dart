@@ -106,7 +106,7 @@ class OscUdpSocket {
   /// Closes the socket and cleans up resources
   Future<void> close() async {
     // Cancel all subscriptions
-    for (final StreamSubscription subscription in _subscriptions) {
+    for (final subscription in _subscriptions) {
       await subscription.cancel();
     }
     _subscriptions.clear();
@@ -137,8 +137,8 @@ class OscUdpSocket {
     }
 
     try {
-      final List<int> bytes = packet.encode();
-      final int result = _socket!.send(
+      final bytes = packet.encode();
+      final result = _socket!.send(
         Uint8List.fromList(bytes),
         address,
         port,
@@ -155,7 +155,7 @@ class OscUdpSocket {
           );
           return -1;
         } else {
-          throw SocketException('Failed to send packet');
+          throw const SocketException('Failed to send packet');
         }
       }
 
@@ -187,7 +187,7 @@ class OscUdpSocket {
     final int port,
   ) async {
     try {
-      final List<InternetAddress> addresses = await InternetAddress.lookup(
+      final addresses = await InternetAddress.lookup(
         hostname,
       );
       if (addresses.isEmpty) {
@@ -231,7 +231,7 @@ class OscUdpSocket {
       );
     }
 
-    final Completer<OscPacketEvent?> completer = Completer<OscPacketEvent?>();
+    final completer = Completer<OscPacketEvent?>();
     Timer? timer;
 
     if (timeout != null) {
@@ -245,13 +245,13 @@ class OscUdpSocket {
     late StreamSubscription subscription;
     subscription = _socket!.listen((final event) {
       if (event == RawSocketEvent.read) {
-        final Datagram? datagram = _socket!.receive();
+        final datagram = _socket!.receive();
         if (datagram != null && !completer.isCompleted) {
           timer?.cancel();
           subscription.cancel();
 
           try {
-            final OscPacket packet = OscPacket.decode(datagram.data);
+            final packet = OscPacket.decode(datagram.data);
             completer.complete(
               OscPacketEvent(
                 packet,
@@ -335,7 +335,7 @@ class OscUdpSocket {
   // Event-driven mode handlers
   void _handleSocketEvent(final RawSocketEvent event) {
     if (event == RawSocketEvent.read) {
-      final Datagram? datagram = _socket!.receive();
+      final datagram = _socket!.receive();
       if (datagram != null) {
         _handleIncomingDatagram(datagram);
       }
@@ -344,7 +344,7 @@ class OscUdpSocket {
 
   void _handleIncomingDatagram(final Datagram datagram) {
     try {
-      final OscPacket packet = OscPacket.decode(datagram.data);
+      final packet = OscPacket.decode(datagram.data);
       _packetController?.add(
         OscPacketEvent(
           packet,
@@ -426,7 +426,7 @@ class OscErrorEvent {
 
   @override
   String toString() {
-    final StringBuffer buffer = StringBuffer('OscErrorEvent(message: $message');
+    final buffer = StringBuffer('OscErrorEvent(message: $message');
     if (error != null) buffer.write(', error: $error');
     if (remoteAddress != null && remotePort != null) {
       buffer.write(', from: ${remoteAddress!.address}:$remotePort');

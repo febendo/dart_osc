@@ -9,14 +9,14 @@ void main() {
       test(
         'should encode /oscillator/4/frequency with 440.0 - spec example',
         () {
-          final OscMessage message = OscMessage(
+          final message = OscMessage(
             '/oscillator/4/frequency',
             <OscArgument>[OscArgument.float32(440)],
           );
-          final List<int> encoded = message.encode();
+          final encoded = message.encode();
 
           // Expected 32-byte message from specification
-          final List<int> expected = <int>[
+          final expected = <int>[
             0x2f, 0x6f, 0x73, 0x63, // "/osc"
             0x69, 0x6c, 0x6c, 0x61, // "illa"
             0x74, 0x6f, 0x72, 0x2f, // "tor/"
@@ -35,7 +35,7 @@ void main() {
       test(
         'should decode /oscillator/4/frequency with 440.0 - spec example',
         () {
-          final Uint8List bytes = Uint8List.fromList(<int>[
+          final bytes = Uint8List.fromList(<int>[
             0x2f, 0x6f, 0x73, 0x63, // "/osc"
             0x69, 0x6c, 0x6c, 0x61, // "illa"
             0x74, 0x6f, 0x72, 0x2f, // "tor/"
@@ -46,7 +46,7 @@ void main() {
             0x43, 0xdc, 0x00, 0x00, // 440.0 as big-endian float32
           ]);
 
-          final OscMessage message = OscMessage.decode(bytes);
+          final message = OscMessage.decode(bytes);
           expect(
             message.addressPattern.toString(),
             equals('/oscillator/4/frequency'),
@@ -58,18 +58,18 @@ void main() {
       );
 
       test('should encode /foo with mixed arguments - spec example', () {
-        final List<OscArgument> args = <OscArgument>[
+        final args = <OscArgument>[
           OscArgument.int32(1000),
           OscArgument.int32(-1),
           OscArgument.string('hello'),
           OscArgument.float32(1.234),
           OscArgument.float32(5.678),
         ];
-        final OscMessage message = OscMessage('/foo', args);
-        final List<int> encoded = message.encode();
+        final message = OscMessage('/foo', args);
+        final encoded = message.encode();
 
         // Expected 40-byte message from specification
-        final List<int> expected = <int>[
+        final expected = <int>[
           0x2f, 0x66, 0x6f, 0x6f, // "/foo"
           0x00, 0x00, 0x00, 0x00, // padding to 32-bit boundary
           0x2c, 0x69, 0x69, 0x73, // ",iis"
@@ -87,7 +87,7 @@ void main() {
       });
 
       test('should decode /foo with mixed arguments - spec example', () {
-        final Uint8List bytes = Uint8List.fromList(<int>[
+        final bytes = Uint8List.fromList(<int>[
           0x2f, 0x66, 0x6f, 0x6f, // "/foo"
           0x00, 0x00, 0x00, 0x00, // padding
           0x2c, 0x69, 0x69, 0x73, // ",iis"
@@ -100,7 +100,7 @@ void main() {
           0x40, 0xb5, 0xb2, 0x2d, // 5.678
         ]);
 
-        final OscMessage message = OscMessage.decode(bytes);
+        final message = OscMessage.decode(bytes);
         expect(message.addressPattern.toString(), equals('/foo'));
         expect(message.arguments.length, equals(5));
         expect(message.typeTagString.toString(), equals(',iisff'));
@@ -115,16 +115,16 @@ void main() {
 
     group('String Examples from Specification', () {
       test('should encode "OSC" string - spec example', () {
-        final OscEncoder encoder = OscEncoder();
-        final List<int> bytes = encoder.encodeString('OSC');
-        final List<int> expected = <int>[0x4f, 0x53, 0x43, 0x00]; // "OSC\0"
+        final encoder = OscEncoder();
+        final bytes = encoder.encodeString('OSC');
+        final expected = <int>[0x4f, 0x53, 0x43, 0x00]; // "OSC\0"
         expect(bytes, equals(expected));
       });
 
       test('should encode "data" string - spec example', () {
-        final OscEncoder encoder = OscEncoder();
-        final List<int> bytes = encoder.encodeString('data');
-        final List<int> expected = <int>[
+        final encoder = OscEncoder();
+        final bytes = encoder.encodeString('data');
+        final expected = <int>[
           0x64,
           0x61,
           0x74,
@@ -140,14 +140,14 @@ void main() {
 
     group('Address Examples from Specification', () {
       test('should handle /resonators/3/frequency address', () {
-        final OscAddress address = OscAddress('/resonators/3/frequency');
+        final address = OscAddress('/resonators/3/frequency');
         expect(address.toString(), equals('/resonators/3/frequency'));
         expect(address.parts, equals(<String>['resonators', '3', 'frequency']));
         expect(address.methodName, equals('frequency'));
       });
 
       test('should handle /a/b/c/d/e address parts', () {
-        final OscAddress address = OscAddress('/a/b/c/d/e');
+        final address = OscAddress('/a/b/c/d/e');
         expect(address.parts, equals(<String>['a', 'b', 'c', 'd', 'e']));
         expect(address.methodName, equals('e'));
 
@@ -162,12 +162,12 @@ void main() {
 
     group('Address Parts Examples from Specification', () {
       test('should parse /a/b/cde parts correctly', () {
-        final OscAddress address = OscAddress('/a/b/cde');
+        final address = OscAddress('/a/b/cde');
         expect(address.parts, equals(<String>['a', 'b', 'cde']));
       });
 
       test('should parse pattern /?/b/*c parts correctly', () {
-        final OscAddressPattern pattern = OscAddressPattern('/?/b/*c');
+        final pattern = OscAddressPattern('/?/b/*c');
         expect(pattern.parts, equals(<String>['?', 'b', '*c']));
       });
     });
@@ -175,7 +175,7 @@ void main() {
     group('Pattern Matching Examples from Specification', () {
       test('should handle pattern matching examples from spec', () {
         // Test addresses from the specification
-        final List<OscAddress> addresses = <OscAddress>[
+        final addresses = <OscAddress>[
           OscAddress('/first/this/one'),
           OscAddress('/second/1'),
           OscAddress('/second/2'),
@@ -185,13 +185,13 @@ void main() {
         ];
 
         // Test patterns from the specification
-        final OscAddressPattern pattern1 = OscAddressPattern('/first/this/one');
-        final OscAddressPattern pattern2 = OscAddressPattern('/second/[1-2]');
-        final OscAddressPattern pattern3 = OscAddressPattern('/third/*');
+        final pattern1 = OscAddressPattern('/first/this/one');
+        final pattern2 = OscAddressPattern('/second/[1-2]');
+        final pattern3 = OscAddressPattern('/third/*');
 
         // Pattern 1 should match only /first/this/one
         expect(pattern1.matches(addresses[0]), isTrue);
-        for (int i = 1; i < addresses.length; i++) {
+        for (var i = 1; i < addresses.length; i++) {
           expect(pattern1.matches(addresses[i]), isFalse);
         }
 
@@ -215,13 +215,13 @@ void main() {
 
     group('Bundle Examples', () {
       test('should create and encode simple bundle', () {
-        final OscMessage message = OscMessage('/test', <OscArgument>[
+        final message = OscMessage('/test', <OscArgument>[
           OscArgument.float32(440),
         ]);
-        final OscBundle bundle = OscBundle(OscTimeTag.immediate(), <OscPacket>[
+        final bundle = OscBundle(const OscTimeTag.immediate(), <OscPacket>[
           message,
         ]);
-        final List<int> encoded = bundle.encode();
+        final encoded = bundle.encode();
 
         // Should start with "#bundle" (8 bytes) + immediate time tag (8 bytes)
         expect(
@@ -239,34 +239,34 @@ void main() {
 
       test('should handle bundle order requirements from spec', () {
         // Create bundle with messages in specific order
-        final List<OscMessage> messages = <OscMessage>[
+        final messages = <OscMessage>[
           OscMessage('/first', <OscArgument>[OscArgument.int32(1)]),
           OscMessage('/second', <OscArgument>[OscArgument.int32(2)]),
           OscMessage('/third', <OscArgument>[OscArgument.int32(3)]),
         ];
 
-        final OscBundle bundle = OscBundle(OscTimeTag.immediate(), messages);
-        final List<int> encoded = bundle.encode();
-        final OscBundle decoded = OscBundle.decode(Uint8List.fromList(encoded));
+        final bundle = OscBundle(const OscTimeTag.immediate(), messages);
+        final encoded = bundle.encode();
+        final decoded = OscBundle.decode(Uint8List.fromList(encoded));
 
         // Messages should maintain order
         expect(decoded.elements.length, equals(3));
-        for (int i = 0; i < 3; i++) {
-          final OscMessage message = decoded.elements[i] as OscMessage;
+        for (var i = 0; i < 3; i++) {
+          final message = decoded.elements[i] as OscMessage;
           expect(message.arguments[0].value, equals(i + 1));
         }
       });
 
       test('should validate nested bundle time constraints', () {
-        final OscTimeTag futureTime = OscTimeTag.fromNtpTimestamp(
+        const futureTime = OscTimeTag.fromNtpTimestamp(
           0x0000000200000000,
         );
-        final OscTimeTag earlierTime = OscTimeTag.fromNtpTimestamp(
+        const earlierTime = OscTimeTag.fromNtpTimestamp(
           0x0000000100000000,
         );
 
         // Inner bundle with earlier time than parent should be rejected
-        final OscBundle innerBundle = OscBundle(earlierTime, <OscPacket>[
+        final innerBundle = OscBundle(earlierTime, <OscPacket>[
           OscMessage('/inner', <OscArgument>[OscArgument.string('test')]),
         ]);
 
@@ -277,16 +277,16 @@ void main() {
         );
 
         // Create inner bundle with future time for acceptance tests
-        final OscTimeTag laterTime = OscTimeTag.fromNtpTimestamp(
+        const laterTime = OscTimeTag.fromNtpTimestamp(
           0x0000000300000000,
         );
-        final OscBundle innerBundleWithFutureTime = OscBundle(
+        final innerBundleWithFutureTime = OscBundle(
           futureTime,
           <OscPacket>[
             OscMessage('/inner', <OscArgument>[OscArgument.string('test')]),
           ],
         );
-        final OscBundle innerBundleWithLaterTime = OscBundle(
+        final innerBundleWithLaterTime = OscBundle(
           laterTime,
           <OscPacket>[
             OscMessage('/inner', <OscArgument>[OscArgument.string('test')]),
@@ -307,16 +307,16 @@ void main() {
 
     group('Time Tag Examples', () {
       test('should handle immediate time tag', () {
-        final OscTimeTag timeTag = OscTimeTag.immediate();
+        const timeTag = OscTimeTag.immediate();
         expect(timeTag.isImmediate, isTrue);
         expect(timeTag.ntpTimestamp, equals(0x0000000000000001));
       });
 
       test('should handle NTP timestamp conversion', () {
         // Test conversion to/from DateTime
-        final DateTime dateTime = DateTime.utc(2000);
-        final OscTimeTag timeTag = OscTimeTag.fromDateTime(dateTime);
-        final DateTime? roundTrip = timeTag.toDateTime();
+        final dateTime = DateTime.utc(2000);
+        final timeTag = OscTimeTag.fromDateTime(dateTime);
+        final roundTrip = timeTag.toDateTime();
 
         // Should be within reasonable precision (seconds)
         expect(
@@ -327,7 +327,7 @@ void main() {
 
       test('should handle fractional seconds precision', () {
         // Test with known fractional value
-        final OscTimeTag halfSecond = OscTimeTag.fromNtpTimestamp(
+        const halfSecond = OscTimeTag.fromNtpTimestamp(
           0x0000000080000000,
         );
         expect(halfSecond.ntpTimestamp, equals(0x0000000080000000));
@@ -338,13 +338,13 @@ void main() {
     group('Type Tag Examples from Specification', () {
       test('should generate correct type tags for spec examples', () {
         // Example 1: One float32 argument -> ",f"
-        final OscTypeTagString typeTag1 = OscTypeTagString(<OscArgument>[
+        final typeTag1 = OscTypeTagString(<OscArgument>[
           OscArgument.float32(440),
         ]);
         expect(typeTag1.toString(), equals(',f'));
 
         // Example 2: Mixed arguments -> ",iisfff"
-        final List<OscArgument> args2 = <OscArgument>[
+        final args2 = <OscArgument>[
           OscArgument.int32(1),
           OscArgument.int32(2),
           OscArgument.string('test'),
@@ -352,27 +352,27 @@ void main() {
           OscArgument.float32(2),
           OscArgument.float32(3),
         ];
-        final OscTypeTagString typeTag2 = OscTypeTagString(args2);
+        final typeTag2 = OscTypeTagString(args2);
         expect(typeTag2.toString(), equals(',iisfff'));
 
         // Example 3: No arguments -> ","
-        final OscTypeTagString typeTag3 = OscTypeTagString(<OscArgument>[]);
+        final typeTag3 = OscTypeTagString(<OscArgument>[]);
         expect(typeTag3.toString(), equals(','));
 
         // Example 4: Blob arguments -> ",ibb"
-        final List<OscArgument> args4 = <OscArgument>[
+        final args4 = <OscArgument>[
           OscArgument.int32(42),
           OscArgument.blob(Uint8List.fromList(<int>[1, 2, 3])),
           OscArgument.blob(Uint8List.fromList(<int>[4, 5, 6])),
         ];
-        final OscTypeTagString typeTag4 = OscTypeTagString(args4);
+        final typeTag4 = OscTypeTagString(args4);
         expect(typeTag4.toString(), equals(',ibb'));
       });
     });
 
     group('Complete Round-Trip Tests', () {
       test('should round-trip all spec examples perfectly', () {
-        final List<OscMessage> testMessages = <OscMessage>[
+        final testMessages = <OscMessage>[
           OscMessage('/oscillator/4/frequency', <OscArgument>[
             OscArgument.float32(440),
           ]),
@@ -391,10 +391,10 @@ void main() {
           ]),
         ];
 
-        for (final OscMessage message in testMessages) {
+        for (final message in testMessages) {
           // Test message round-trip
-          final List<int> encoded = message.encode();
-          final OscMessage decoded = OscMessage.decode(
+          final encoded = message.encode();
+          final decoded = OscMessage.decode(
             Uint8List.fromList(encoded),
           );
 
@@ -405,18 +405,17 @@ void main() {
           expect(decoded.arguments.length, equals(message.arguments.length));
 
           // Test in bundle round-trip
-          final OscBundle bundle = OscBundle(
-            OscTimeTag.immediate(),
+          final bundle = OscBundle(
+            const OscTimeTag.immediate(),
             <OscPacket>[message],
           );
-          final List<int> bundleEncoded = bundle.encode();
-          final OscBundle bundleDecoded = OscBundle.decode(
+          final bundleEncoded = bundle.encode();
+          final bundleDecoded = OscBundle.decode(
             Uint8List.fromList(bundleEncoded),
           );
 
           expect(bundleDecoded.elements.length, equals(1));
-          final OscMessage bundleMessage =
-              bundleDecoded.elements[0] as OscMessage;
+          final bundleMessage = bundleDecoded.elements[0] as OscMessage;
           expect(
             bundleMessage.addressPattern.toString(),
             equals(message.addressPattern.toString()),
@@ -426,37 +425,37 @@ void main() {
 
       test('should handle complex nested bundle scenarios', () {
         // Create a complex nested structure
-        final List<OscMessage> level3Messages = <OscMessage>[
+        final level3Messages = <OscMessage>[
           OscMessage('/level3/msg1', <OscArgument>[OscArgument.int32(31)]),
           OscMessage('/level3/msg2', <OscArgument>[OscArgument.string('deep')]),
         ];
-        final OscBundle level3Bundle = OscBundle(
-          OscTimeTag.fromNtpTimestamp(0x0000000300000000),
+        final level3Bundle = OscBundle(
+          const OscTimeTag.fromNtpTimestamp(0x0000000300000000),
           level3Messages,
         );
 
-        final List<OscPacket> level2Messages = <OscPacket>[
+        final level2Messages = <OscPacket>[
           OscMessage('/level2/msg1', <OscArgument>[OscArgument.float32(2)]),
           level3Bundle,
         ];
-        final OscBundle level2Bundle = OscBundle(
-          OscTimeTag.fromNtpTimestamp(0x0000000200000000),
+        final level2Bundle = OscBundle(
+          const OscTimeTag.fromNtpTimestamp(0x0000000200000000),
           level2Messages,
         );
 
-        final List<OscPacket> level1Messages = <OscPacket>[
+        final level1Messages = <OscPacket>[
           OscMessage('/level1/msg1', <OscArgument>[OscArgument.int32(1)]),
           level2Bundle,
           OscMessage('/level1/msg2', <OscArgument>[OscArgument.string('end')]),
         ];
-        final OscBundle level1Bundle = OscBundle(
-          OscTimeTag.fromNtpTimestamp(0x0000000100000000),
+        final level1Bundle = OscBundle(
+          const OscTimeTag.fromNtpTimestamp(0x0000000100000000),
           level1Messages,
         );
 
         // Round-trip the complex structure
-        final List<int> encoded = level1Bundle.encode();
-        final OscBundle decoded = OscBundle.decode(Uint8List.fromList(encoded));
+        final encoded = level1Bundle.encode();
+        final decoded = OscBundle.decode(Uint8List.fromList(encoded));
 
         // Verify structure is preserved
         expect(decoded.elements.length, equals(3));
@@ -464,12 +463,12 @@ void main() {
         expect(decoded.elements[1], isA<OscBundle>());
         expect(decoded.elements[2], isA<OscMessage>());
 
-        final OscBundle nestedBundle = decoded.elements[1] as OscBundle;
+        final nestedBundle = decoded.elements[1] as OscBundle;
         expect(nestedBundle.elements.length, equals(2));
         expect(nestedBundle.elements[0], isA<OscMessage>());
         expect(nestedBundle.elements[1], isA<OscBundle>());
 
-        final OscBundle deepestBundle = nestedBundle.elements[1] as OscBundle;
+        final deepestBundle = nestedBundle.elements[1] as OscBundle;
         expect(deepestBundle.elements.length, equals(2));
         expect(deepestBundle.elements[0], isA<OscMessage>());
         expect(deepestBundle.elements[1], isA<OscMessage>());
@@ -497,36 +496,36 @@ void main() {
       });
 
       test('should validate packet size constraints', () {
-        final OscMessage message = OscMessage('/test', <OscArgument>[
+        final message = OscMessage('/test', <OscArgument>[
           OscArgument.int32(42),
         ]);
-        final List<int> encoded = message.encode();
+        final encoded = message.encode();
 
         // All OSC packets must be multiple of 4 bytes
         expect(encoded.length % 4, equals(0));
 
-        final OscBundle bundle = OscBundle(OscTimeTag.immediate(), <OscPacket>[
+        final bundle = OscBundle(const OscTimeTag.immediate(), <OscPacket>[
           message,
         ]);
-        final List<int> bundleEncoded = bundle.encode();
+        final bundleEncoded = bundle.encode();
         expect(bundleEncoded.length % 4, equals(0));
       });
 
       test('should handle large messages correctly', () {
         // Create a message with many arguments
-        final List<OscArgument> largeArgs = List.generate(
+        final largeArgs = List<OscArgument>.generate(
           100,
           OscArgument.int32,
         );
-        final OscMessage largeMessage = OscMessage('/large/message', largeArgs);
+        final largeMessage = OscMessage('/large/message', largeArgs);
 
-        final List<int> encoded = largeMessage.encode();
-        final OscMessage decoded = OscMessage.decode(
+        final encoded = largeMessage.encode();
+        final decoded = OscMessage.decode(
           Uint8List.fromList(encoded),
         );
 
         expect(decoded.arguments.length, equals(100));
-        for (int i = 0; i < 100; i++) {
+        for (var i = 0; i < 100; i++) {
           expect(decoded.arguments[i].value, equals(i));
         }
       });

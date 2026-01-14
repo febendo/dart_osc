@@ -5,36 +5,36 @@ void main() {
   group('OSC Pattern Matching', () {
     group('Basic Pattern Matching', () {
       test('should match exact address patterns', () {
-        final OscAddressPattern pattern = OscAddressPattern(
+        final pattern = OscAddressPattern(
           '/oscillator/4/frequency',
         );
-        final OscAddress address = OscAddress('/oscillator/4/frequency');
+        final address = OscAddress('/oscillator/4/frequency');
         expect(pattern.matches(address), isTrue);
       });
 
       test('should not match different address patterns', () {
-        final OscAddressPattern pattern = OscAddressPattern(
+        final pattern = OscAddressPattern(
           '/oscillator/4/frequency',
         );
-        final OscAddress address = OscAddress('/oscillator/5/frequency');
+        final address = OscAddress('/oscillator/5/frequency');
         expect(pattern.matches(address), isFalse);
       });
 
       test('should not match patterns with different part counts', () {
-        final OscAddressPattern pattern = OscAddressPattern('/oscillator/4');
-        final OscAddress address = OscAddress('/oscillator/4/frequency');
+        final pattern = OscAddressPattern('/oscillator/4');
+        final address = OscAddress('/oscillator/4/frequency');
         expect(pattern.matches(address), isFalse);
       });
 
       test('should match root pattern', () {
-        final OscAddressPattern pattern = OscAddressPattern('/');
-        final OscAddress address = OscAddress('/');
+        final pattern = OscAddressPattern('/');
+        final address = OscAddress('/');
         expect(pattern.matches(address), isTrue);
       });
 
       test('should not match empty patterns', () {
-        final OscAddressPattern pattern = OscAddressPattern('/test');
-        final OscAddress address = OscAddress('/');
+        final pattern = OscAddressPattern('/test');
+        final address = OscAddress('/');
         expect(pattern.matches(address), isFalse);
       });
     });
@@ -42,7 +42,7 @@ void main() {
     group('Wildcard Pattern Matching', () {
       group('Question Mark (?) - Single Character', () {
         test('should match single character with ?', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/?/frequency',
           );
           expect(
@@ -64,7 +64,7 @@ void main() {
         });
 
         test('should not match multiple characters with ?', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/?/frequency',
           );
           expect(
@@ -82,34 +82,34 @@ void main() {
         });
 
         test('should match multiple ? wildcards', () {
-          final OscAddressPattern pattern = OscAddressPattern('/??/test');
+          final pattern = OscAddressPattern('/??/test');
           expect(pattern.matches(OscAddress('/ab/test')), isTrue);
           expect(pattern.matches(OscAddress('/12/test')), isTrue);
           expect(pattern.matches(OscAddress('/a1/test')), isTrue);
         });
 
         test('should not match when ? count differs', () {
-          final OscAddressPattern pattern = OscAddressPattern('/??/test');
+          final pattern = OscAddressPattern('/??/test');
           expect(pattern.matches(OscAddress('/a/test')), isFalse);
           expect(pattern.matches(OscAddress('/abc/test')), isFalse);
         });
 
         test('should match ? at beginning of part', () {
-          final OscAddressPattern pattern = OscAddressPattern('/?est');
+          final pattern = OscAddressPattern('/?est');
           expect(pattern.matches(OscAddress('/test')), isTrue);
           expect(pattern.matches(OscAddress('/best')), isTrue);
           expect(pattern.matches(OscAddress('/rest')), isTrue);
         });
 
         test('should match ? at end of part', () {
-          final OscAddressPattern pattern = OscAddressPattern('/tes?');
+          final pattern = OscAddressPattern('/tes?');
           expect(pattern.matches(OscAddress('/test')), isTrue);
           expect(pattern.matches(OscAddress('/tesa')), isTrue);
           expect(pattern.matches(OscAddress('/tes1')), isTrue);
         });
 
         test('should match ? in middle of part', () {
-          final OscAddressPattern pattern = OscAddressPattern('/te?t');
+          final pattern = OscAddressPattern('/te?t');
           expect(pattern.matches(OscAddress('/test')), isTrue);
           expect(pattern.matches(OscAddress('/teat')), isTrue);
           expect(pattern.matches(OscAddress('/te1t')), isTrue);
@@ -118,14 +118,14 @@ void main() {
 
       group('Asterisk (*) - Multiple Characters', () {
         test('should match zero characters with *', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/*/frequency',
           );
           expect(pattern.matches(OscAddress('/oscillator//frequency')), isTrue);
         });
 
         test('should match single character with *', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/*/frequency',
           );
           expect(
@@ -139,7 +139,7 @@ void main() {
         });
 
         test('should match multiple characters with *', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/*/frequency',
           );
           expect(
@@ -157,35 +157,35 @@ void main() {
         });
 
         test('should match entire part with *', () {
-          final OscAddressPattern pattern = OscAddressPattern('/*/frequency');
+          final pattern = OscAddressPattern('/*/frequency');
           expect(pattern.matches(OscAddress('/oscillator/frequency')), isTrue);
           expect(pattern.matches(OscAddress('/synth/frequency')), isTrue);
           expect(pattern.matches(OscAddress('/anything123/frequency')), isTrue);
         });
 
         test('should match * at beginning of part', () {
-          final OscAddressPattern pattern = OscAddressPattern('/*est');
+          final pattern = OscAddressPattern('/*est');
           expect(pattern.matches(OscAddress('/test')), isTrue);
           expect(pattern.matches(OscAddress('/best')), isTrue);
           expect(pattern.matches(OscAddress('/longest-test')), isTrue);
         });
 
         test('should match * at end of part', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test*');
+          final pattern = OscAddressPattern('/test*');
           expect(pattern.matches(OscAddress('/test')), isTrue);
           expect(pattern.matches(OscAddress('/test1')), isTrue);
           expect(pattern.matches(OscAddress('/testing')), isTrue);
         });
 
         test('should match * in middle of part', () {
-          final OscAddressPattern pattern = OscAddressPattern('/te*st');
+          final pattern = OscAddressPattern('/te*st');
           expect(pattern.matches(OscAddress('/test')), isTrue);
           expect(pattern.matches(OscAddress('/te123st')), isTrue);
           expect(pattern.matches(OscAddress('/teABCst')), isTrue);
         });
 
         test('should match multiple * wildcards', () {
-          final OscAddressPattern pattern = OscAddressPattern('/*/*');
+          final pattern = OscAddressPattern('/*/*');
           expect(pattern.matches(OscAddress('/a/b')), isTrue);
           expect(pattern.matches(OscAddress('/oscillator/frequency')), isTrue);
           expect(
@@ -197,7 +197,7 @@ void main() {
 
       group('Mixed Wildcards', () {
         test('should match combination of ? and *', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/?*/frequency',
           );
           expect(
@@ -219,7 +219,7 @@ void main() {
         });
 
         test('should not match when required character is missing', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/?*/frequency',
           );
           expect(
@@ -229,7 +229,7 @@ void main() {
         });
 
         test('should match complex wildcard patterns', () {
-          final OscAddressPattern pattern = OscAddressPattern('/*/?/test*');
+          final pattern = OscAddressPattern('/*/?/test*');
           expect(pattern.matches(OscAddress('/abc/1/test')), isTrue);
           expect(pattern.matches(OscAddress('/long/a/testing')), isTrue);
           expect(pattern.matches(OscAddress('/x/z/test123')), isTrue);
@@ -240,7 +240,7 @@ void main() {
     group('Character Class Pattern Matching', () {
       group('Basic Character Classes [abc]', () {
         test('should match characters in class', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/[123]/frequency',
           );
           expect(
@@ -258,7 +258,7 @@ void main() {
         });
 
         test('should not match characters not in class', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/oscillator/[123]/frequency',
           );
           expect(
@@ -276,7 +276,7 @@ void main() {
         });
 
         test('should match alphabetic character class', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[abc]');
+          final pattern = OscAddressPattern('/test/[abc]');
           expect(pattern.matches(OscAddress('/test/a')), isTrue);
           expect(pattern.matches(OscAddress('/test/b')), isTrue);
           expect(pattern.matches(OscAddress('/test/c')), isTrue);
@@ -284,7 +284,7 @@ void main() {
         });
 
         test('should match mixed character class', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[a1B]');
+          final pattern = OscAddressPattern('/test/[a1B]');
           expect(pattern.matches(OscAddress('/test/a')), isTrue);
           expect(pattern.matches(OscAddress('/test/1')), isTrue);
           expect(pattern.matches(OscAddress('/test/B')), isTrue);
@@ -293,7 +293,7 @@ void main() {
         });
 
         test('should handle single character in class', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[x]');
+          final pattern = OscAddressPattern('/test/[x]');
           expect(pattern.matches(OscAddress('/test/x')), isTrue);
           expect(pattern.matches(OscAddress('/test/y')), isFalse);
         });
@@ -301,7 +301,7 @@ void main() {
 
       group('Character Ranges [a-z]', () {
         test('should match character ranges', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[1-3]');
+          final pattern = OscAddressPattern('/test/[1-3]');
           expect(pattern.matches(OscAddress('/test/1')), isTrue);
           expect(pattern.matches(OscAddress('/test/2')), isTrue);
           expect(pattern.matches(OscAddress('/test/3')), isTrue);
@@ -310,7 +310,7 @@ void main() {
         });
 
         test('should match alphabetic ranges', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[a-c]');
+          final pattern = OscAddressPattern('/test/[a-c]');
           expect(pattern.matches(OscAddress('/test/a')), isTrue);
           expect(pattern.matches(OscAddress('/test/b')), isTrue);
           expect(pattern.matches(OscAddress('/test/c')), isTrue);
@@ -319,7 +319,7 @@ void main() {
         });
 
         test('should match uppercase ranges', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[A-C]');
+          final pattern = OscAddressPattern('/test/[A-C]');
           expect(pattern.matches(OscAddress('/test/A')), isTrue);
           expect(pattern.matches(OscAddress('/test/B')), isTrue);
           expect(pattern.matches(OscAddress('/test/C')), isTrue);
@@ -328,7 +328,7 @@ void main() {
         });
 
         test('should handle multiple ranges in same class', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/test/[a-cA-C1-3]',
           );
           expect(pattern.matches(OscAddress('/test/a')), isTrue);
@@ -340,7 +340,7 @@ void main() {
         });
 
         test('should handle minus at end of class (literal minus)', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[abc-]');
+          final pattern = OscAddressPattern('/test/[abc-]');
           expect(pattern.matches(OscAddress('/test/a')), isTrue);
           expect(pattern.matches(OscAddress('/test/-')), isTrue);
           expect(pattern.matches(OscAddress('/test/d')), isFalse);
@@ -349,21 +349,21 @@ void main() {
 
       group('Negated Character Classes [!abc]', () {
         test('should not match characters in negated class', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[!abc]');
+          final pattern = OscAddressPattern('/test/[!abc]');
           expect(pattern.matches(OscAddress('/test/a')), isFalse);
           expect(pattern.matches(OscAddress('/test/b')), isFalse);
           expect(pattern.matches(OscAddress('/test/c')), isFalse);
         });
 
         test('should match characters not in negated class', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[!abc]');
+          final pattern = OscAddressPattern('/test/[!abc]');
           expect(pattern.matches(OscAddress('/test/d')), isTrue);
           expect(pattern.matches(OscAddress('/test/1')), isTrue);
           expect(pattern.matches(OscAddress('/test/Z')), isTrue);
         });
 
         test('should handle negated ranges', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[!1-3]');
+          final pattern = OscAddressPattern('/test/[!1-3]');
           expect(pattern.matches(OscAddress('/test/1')), isFalse);
           expect(pattern.matches(OscAddress('/test/2')), isFalse);
           expect(pattern.matches(OscAddress('/test/3')), isFalse);
@@ -373,7 +373,7 @@ void main() {
         });
 
         test('should handle exclamation point not at beginning (literal)', () {
-          final OscAddressPattern pattern = OscAddressPattern('/test/[a!b]');
+          final pattern = OscAddressPattern('/test/[a!b]');
           expect(pattern.matches(OscAddress('/test/a')), isTrue);
           expect(pattern.matches(OscAddress('/test/!')), isTrue);
           expect(pattern.matches(OscAddress('/test/b')), isTrue);
@@ -383,7 +383,7 @@ void main() {
 
       group('Complex Character Classes', () {
         test('should match character classes at different positions', () {
-          final OscAddressPattern pattern = OscAddressPattern(
+          final pattern = OscAddressPattern(
             '/[abc]/test/[123]',
           );
           expect(pattern.matches(OscAddress('/a/test/1')), isTrue);
@@ -394,7 +394,7 @@ void main() {
         });
 
         test('should combine character classes with other wildcards', () {
-          final OscAddressPattern pattern = OscAddressPattern('/*/[abc]/test?');
+          final pattern = OscAddressPattern('/*/[abc]/test?');
           expect(pattern.matches(OscAddress('/anything/a/test1')), isTrue);
           expect(pattern.matches(OscAddress('/x/b/testZ')), isTrue);
           expect(pattern.matches(OscAddress('/long/c/testA')), isTrue);
@@ -405,7 +405,7 @@ void main() {
 
     group('String Alternative Pattern Matching {foo,bar}', () {
       test('should match strings in alternative list', () {
-        final OscAddressPattern pattern = OscAddressPattern(
+        final pattern = OscAddressPattern(
           '/oscillator/{1,2,3}/frequency',
         );
         expect(pattern.matches(OscAddress('/oscillator/1/frequency')), isTrue);
@@ -415,7 +415,7 @@ void main() {
       });
 
       test('should match multi-character alternatives', () {
-        final OscAddressPattern pattern = OscAddressPattern(
+        final pattern = OscAddressPattern(
           '/synth/{osc,filter,env}/param',
         );
         expect(pattern.matches(OscAddress('/synth/osc/param')), isTrue);
@@ -425,27 +425,27 @@ void main() {
       });
 
       test('should handle two alternatives', () {
-        final OscAddressPattern pattern = OscAddressPattern('/test/{foo,bar}');
+        final pattern = OscAddressPattern('/test/{foo,bar}');
         expect(pattern.matches(OscAddress('/test/foo')), isTrue);
         expect(pattern.matches(OscAddress('/test/bar')), isTrue);
         expect(pattern.matches(OscAddress('/test/baz')), isFalse);
       });
 
       test('should handle single alternative', () {
-        final OscAddressPattern pattern = OscAddressPattern('/test/{foo}');
+        final pattern = OscAddressPattern('/test/{foo}');
         expect(pattern.matches(OscAddress('/test/foo')), isTrue);
         expect(pattern.matches(OscAddress('/test/bar')), isFalse);
       });
 
       test('should handle empty alternatives', () {
-        final OscAddressPattern pattern = OscAddressPattern('/test/{,foo}');
+        final pattern = OscAddressPattern('/test/{,foo}');
         expect(pattern.matches(OscAddress('/test/')), isTrue);
         expect(pattern.matches(OscAddress('/test/foo')), isTrue);
         expect(pattern.matches(OscAddress('/test/bar')), isFalse);
       });
 
       test('should handle alternatives with special characters', () {
-        final OscAddressPattern pattern = OscAddressPattern(
+        final pattern = OscAddressPattern(
           '/test/{a-b,c_d,e.f}',
         );
         expect(pattern.matches(OscAddress('/test/a-b')), isTrue);
@@ -455,7 +455,7 @@ void main() {
       });
 
       test('should combine alternatives with other patterns', () {
-        final OscAddressPattern pattern = OscAddressPattern('/*/{foo,bar}/?');
+        final pattern = OscAddressPattern('/*/{foo,bar}/?');
         expect(pattern.matches(OscAddress('/test/foo/a')), isTrue);
         expect(pattern.matches(OscAddress('/xyz/bar/1')), isTrue);
         expect(pattern.matches(OscAddress('/anything/foo/Z')), isTrue);
@@ -465,14 +465,14 @@ void main() {
 
     group('Complex Pattern Combinations', () {
       test('should handle pattern from spec examples', () {
-        final OscAddressPattern pattern = OscAddressPattern('/second/[1-2]');
+        final pattern = OscAddressPattern('/second/[1-2]');
         expect(pattern.matches(OscAddress('/second/1')), isTrue);
         expect(pattern.matches(OscAddress('/second/2')), isTrue);
         expect(pattern.matches(OscAddress('/second/3')), isFalse);
       });
 
       test('should handle wildcard pattern from spec examples', () {
-        final OscAddressPattern pattern = OscAddressPattern('/third/*');
+        final pattern = OscAddressPattern('/third/*');
         expect(pattern.matches(OscAddress('/third/a')), isTrue);
         expect(pattern.matches(OscAddress('/third/b')), isTrue);
         expect(pattern.matches(OscAddress('/third/c')), isTrue);
@@ -481,7 +481,7 @@ void main() {
       });
 
       test('should handle all pattern types together', () {
-        final OscAddressPattern pattern = OscAddressPattern(
+        final pattern = OscAddressPattern(
           '/*/{test,demo}/[a-c]?/end*',
         );
         expect(pattern.matches(OscAddress('/prefix/test/a1/end')), isTrue);
@@ -493,7 +493,7 @@ void main() {
       });
 
       test('should handle nested pattern structures', () {
-        final OscAddressPattern pattern = OscAddressPattern(
+        final pattern = OscAddressPattern(
           '/osc[1-3]/{sin,saw}/*',
         );
         expect(pattern.matches(OscAddress('/osc1/sin/frequency')), isTrue);
@@ -504,7 +504,7 @@ void main() {
       });
 
       test('should be case sensitive', () {
-        final OscAddressPattern pattern = OscAddressPattern(
+        final pattern = OscAddressPattern(
           '/Test/{FOO,bar}/[A-Z]',
         );
         expect(pattern.matches(OscAddress('/Test/FOO/A')), isTrue);
@@ -564,10 +564,10 @@ void main() {
       });
 
       test('should parse address parts correctly', () {
-        final OscAddress address = OscAddress('/a/b/cde');
+        final address = OscAddress('/a/b/cde');
         expect(address.parts, equals(<String>['a', 'b', 'cde']));
 
-        final OscAddress address2 = OscAddress('/resonators/3/frequency');
+        final address2 = OscAddress('/resonators/3/frequency');
         expect(
           address2.parts,
           equals(<String>['resonators', '3', 'frequency']),
