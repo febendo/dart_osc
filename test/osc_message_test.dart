@@ -8,16 +8,20 @@ void main() {
     group('OSC Address Pattern', () {
       test('should accept valid address patterns starting with /', () {
         expect(() => OscAddressPattern('/test'), returnsNormally);
-        expect(() => OscAddressPattern('/oscillator/4/frequency'),
-            returnsNormally);
+        expect(
+          () => OscAddressPattern('/oscillator/4/frequency'),
+          returnsNormally,
+        );
         expect(() => OscAddressPattern('/a/b/c/d/e'), returnsNormally);
         expect(() => OscAddressPattern('/'), returnsNormally);
       });
 
       test('should reject address patterns not starting with /', () {
         expect(() => OscAddressPattern('test'), throwsArgumentError);
-        expect(() => OscAddressPattern('oscillator/4/frequency'),
-            throwsArgumentError);
+        expect(
+          () => OscAddressPattern('oscillator/4/frequency'),
+          throwsArgumentError,
+        );
         expect(() => OscAddressPattern(''), throwsArgumentError);
       });
 
@@ -36,10 +40,13 @@ void main() {
         final OscAddressPattern pattern1 = OscAddressPattern('/a/b/cde');
         expect(pattern1.parts, equals(<String>['a', 'b', 'cde']));
 
-        final OscAddressPattern pattern2 =
-            OscAddressPattern('/oscillator/4/frequency');
+        final OscAddressPattern pattern2 = OscAddressPattern(
+          '/oscillator/4/frequency',
+        );
         expect(
-            pattern2.parts, equals(<String>['oscillator', '4', 'frequency']));
+          pattern2.parts,
+          equals(<String>['oscillator', '4', 'frequency']),
+        );
 
         final OscAddressPattern pattern3 = OscAddressPattern('/');
         expect(pattern3.parts, equals(<OscAddressPattern>[]));
@@ -49,8 +56,9 @@ void main() {
         final OscAddressPattern pattern1 = OscAddressPattern('/a/b/cde');
         expect(pattern1.methodName, equals('cde'));
 
-        final OscAddressPattern pattern2 =
-            OscAddressPattern('/oscillator/4/frequency');
+        final OscAddressPattern pattern2 = OscAddressPattern(
+          '/oscillator/4/frequency',
+        );
         expect(pattern2.methodName, equals('frequency'));
 
         final OscAddressPattern pattern3 = OscAddressPattern('/single');
@@ -65,8 +73,9 @@ void main() {
       });
 
       test('should generate correct type tag for single float argument', () {
-        final OscTypeTagString typeTag =
-            OscTypeTagString(<OscArgument>[OscArgument.float32(440)]);
+        final OscTypeTagString typeTag = OscTypeTagString(<OscArgument>[
+          OscArgument.float32(440),
+        ]);
         expect(typeTag.toString(), equals(',f'));
       });
 
@@ -114,10 +123,14 @@ void main() {
       });
 
       test('should reject type tag string not starting with comma', () {
-        expect(() => OscTypeTagString.parse('iisfff'),
-            throwsA(isA<OscFormatException>()));
-        expect(() => OscTypeTagString.parse(''),
-            throwsA(isA<OscFormatException>()));
+        expect(
+          () => OscTypeTagString.parse('iisfff'),
+          throwsA(isA<OscFormatException>()),
+        );
+        expect(
+          () => OscTypeTagString.parse(''),
+          throwsA(isA<OscFormatException>()),
+        );
       });
     });
 
@@ -169,7 +182,9 @@ void main() {
         expect(OscArgument.int64(123).typeTag, equals('h'));
         expect(OscArgument.double64(3.14).typeTag, equals('d'));
         expect(
-            OscArgument.timetag(OscTimeTag.immediate()).typeTag, equals('t'));
+          OscArgument.timetag(OscTimeTag.immediate()).typeTag,
+          equals('t'),
+        );
         expect(OscArgument.char('A').typeTag, equals('c'));
         expect(OscArgument.true_().typeTag, equals('T'));
         expect(OscArgument.false_().typeTag, equals('F'));
@@ -178,19 +193,29 @@ void main() {
       });
 
       test('should reject invalid string argument', () {
-        expect(() => OscArgument.string('hel\x00lo'),
-            throwsA(isA<OscArgumentException>()));
-        expect(() => OscArgument.string('héllo'),
-            throwsA(isA<OscArgumentException>()));
+        expect(
+          () => OscArgument.string('hel\x00lo'),
+          throwsA(isA<OscArgumentException>()),
+        );
+        expect(
+          () => OscArgument.string('héllo'),
+          throwsA(isA<OscArgumentException>()),
+        );
       });
 
       test('should reject invalid char argument', () {
         expect(
-            () => OscArgument.char('AB'), throwsA(isA<OscArgumentException>()));
+          () => OscArgument.char('AB'),
+          throwsA(isA<OscArgumentException>()),
+        );
         expect(
-            () => OscArgument.char(''), throwsA(isA<OscArgumentException>()));
+          () => OscArgument.char(''),
+          throwsA(isA<OscArgumentException>()),
+        );
         expect(
-            () => OscArgument.char('é'), throwsA(isA<OscArgumentException>()));
+          () => OscArgument.char('é'),
+          throwsA(isA<OscArgumentException>()),
+        );
       });
     });
 
@@ -204,9 +229,13 @@ void main() {
 
       test('should create message with single float argument', () {
         final OscMessage message = OscMessage(
-            '/oscillator/4/frequency', <OscArgument>[OscArgument.float32(440)]);
-        expect(message.addressPattern.toString(),
-            equals('/oscillator/4/frequency'));
+          '/oscillator/4/frequency',
+          <OscArgument>[OscArgument.float32(440)],
+        );
+        expect(
+          message.addressPattern.toString(),
+          equals('/oscillator/4/frequency'),
+        );
         expect(message.arguments.length, equals(1));
         expect(message.arguments[0].value, equals(440.0));
         expect(message.typeTagString.toString(), equals(',f'));
@@ -228,7 +257,9 @@ void main() {
 
       test('should encode message correctly - example from spec', () {
         final OscMessage message = OscMessage(
-            '/oscillator/4/frequency', <OscArgument>[OscArgument.float32(440)]);
+          '/oscillator/4/frequency',
+          <OscArgument>[OscArgument.float32(440)],
+        );
         final List<int> encoded = message.encode();
 
         // Expected bytes from the specification
@@ -246,35 +277,37 @@ void main() {
         expect(encoded, equals(expected));
       });
 
-      test('should encode message with multiple arguments - example from spec',
-          () {
-        final List<OscArgument> args = <OscArgument>[
-          OscArgument.int32(1000),
-          OscArgument.int32(-1),
-          OscArgument.string('hello'),
-          OscArgument.float32(1.234),
-          OscArgument.float32(5.678),
-        ];
-        final OscMessage message = OscMessage('/foo', args);
-        final List<int> encoded = message.encode();
+      test(
+        'should encode message with multiple arguments - example from spec',
+        () {
+          final List<OscArgument> args = <OscArgument>[
+            OscArgument.int32(1000),
+            OscArgument.int32(-1),
+            OscArgument.string('hello'),
+            OscArgument.float32(1.234),
+            OscArgument.float32(5.678),
+          ];
+          final OscMessage message = OscMessage('/foo', args);
+          final List<int> encoded = message.encode();
 
-        // Expected bytes from the specification (40 bytes total)
-        final List<int> expected = <int>[
-          0x2f, 0x66, 0x6f, 0x6f, // "/foo"
-          0x00, 0x00, 0x00, 0x00, // padding
-          0x2c, 0x69, 0x69, 0x73, // ",iis"
-          0x66, 0x66, 0x00, 0x00, // "ff\0\0"
-          0x00, 0x00, 0x03, 0xe8, // 1000
-          0xff, 0xff, 0xff, 0xff, // -1
-          0x68, 0x65, 0x6c, 0x6c, // "hell"
-          0x6f, 0x00, 0x00, 0x00, // "o\0\0\0"
-          0x3f, 0x9d, 0xf3, 0xb6, // 1.234
-          0x40, 0xb5, 0xb2, 0x2d, // 5.678
-        ];
+          // Expected bytes from the specification (40 bytes total)
+          final List<int> expected = <int>[
+            0x2f, 0x66, 0x6f, 0x6f, // "/foo"
+            0x00, 0x00, 0x00, 0x00, // padding
+            0x2c, 0x69, 0x69, 0x73, // ",iis"
+            0x66, 0x66, 0x00, 0x00, // "ff\0\0"
+            0x00, 0x00, 0x03, 0xe8, // 1000
+            0xff, 0xff, 0xff, 0xff, // -1
+            0x68, 0x65, 0x6c, 0x6c, // "hell"
+            0x6f, 0x00, 0x00, 0x00, // "o\0\0\0"
+            0x3f, 0x9d, 0xf3, 0xb6, // 1.234
+            0x40, 0xb5, 0xb2, 0x2d, // 5.678
+          ];
 
-        expect(encoded, equals(expected));
-        expect(encoded.length, equals(40));
-      });
+          expect(encoded, equals(expected));
+          expect(encoded.length, equals(40));
+        },
+      );
 
       test('should decode message correctly', () {
         final Uint8List bytes = Uint8List.fromList(<int>[
@@ -289,8 +322,10 @@ void main() {
         ]);
 
         final OscMessage message = OscMessage.decode(bytes);
-        expect(message.addressPattern.toString(),
-            equals('/oscillator/4/frequency'));
+        expect(
+          message.addressPattern.toString(),
+          equals('/oscillator/4/frequency'),
+        );
         expect(message.arguments.length, equals(1));
         expect(message.arguments[0].value, closeTo(440.0, 0.001));
         expect(message.typeTagString.toString(), equals(',f'));
@@ -299,8 +334,9 @@ void main() {
       test('should round-trip encode and decode messages', () {
         final List<OscMessage> testMessages = <OscMessage>[
           OscMessage('/test', <OscArgument>[]),
-          OscMessage('/oscillator/4/frequency',
-              <OscArgument>[OscArgument.float32(440)]),
+          OscMessage('/oscillator/4/frequency', <OscArgument>[
+            OscArgument.float32(440),
+          ]),
           OscMessage('/foo', <OscArgument>[
             OscArgument.int32(1000),
             OscArgument.int32(-1),
@@ -317,14 +353,19 @@ void main() {
 
         for (final OscMessage message in testMessages) {
           final List<int> encoded = message.encode();
-          final OscMessage decoded =
-              OscMessage.decode(Uint8List.fromList(encoded));
+          final OscMessage decoded = OscMessage.decode(
+            Uint8List.fromList(encoded),
+          );
 
-          expect(decoded.addressPattern.toString(),
-              equals(message.addressPattern.toString()));
+          expect(
+            decoded.addressPattern.toString(),
+            equals(message.addressPattern.toString()),
+          );
           expect(decoded.arguments.length, equals(message.arguments.length));
-          expect(decoded.typeTagString.toString(),
-              equals(message.typeTagString.toString()));
+          expect(
+            decoded.typeTagString.toString(),
+            equals(message.typeTagString.toString()),
+          );
 
           for (int i = 0; i < message.arguments.length; i++) {
             final OscArgument original = message.arguments[i];
@@ -340,22 +381,25 @@ void main() {
         }
       });
 
-      test('should handle message without type tag string (legacy support)',
-          () {
-        // Create a message bytes without type tag string
-        final Uint8List bytes = Uint8List.fromList(<int>[
-          0x2f, 0x74, 0x65, 0x73, // "/tes"
-          0x74, 0x00, 0x00, 0x00, // "t\0\0\0"
-          0x43, 0xdc, 0x00, 0x00, // 440.0 as float32 (but no type tag)
-        ]);
+      test(
+        'should handle message without type tag string (legacy support)',
+        () {
+          // Create a message bytes without type tag string
+          final Uint8List bytes = Uint8List.fromList(<int>[
+            0x2f, 0x74, 0x65, 0x73, // "/tes"
+            0x74, 0x00, 0x00, 0x00, // "t\0\0\0"
+            0x43, 0xdc, 0x00, 0x00, // 440.0 as float32 (but no type tag)
+          ]);
 
-        // Should be robust and handle missing type tag
-        expect(() => OscMessage.decode(bytes), returnsNormally);
-      });
+          // Should be robust and handle missing type tag
+          expect(() => OscMessage.decode(bytes), returnsNormally);
+        },
+      );
 
       test('should validate message size is multiple of 4', () {
-        final OscMessage message =
-            OscMessage('/test', <OscArgument>[OscArgument.float32(440)]);
+        final OscMessage message = OscMessage('/test', <OscArgument>[
+          OscArgument.float32(440),
+        ]);
         final List<int> encoded = message.encode();
         expect(encoded.length % 4, equals(0));
       });

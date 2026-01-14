@@ -11,8 +11,9 @@ import 'package:dart_osc/src/osc_exceptions.dart';
 class OscTypeTagString {
   /// Creates a type tag string from a list of OSC arguments
   factory OscTypeTagString(final List<OscArgument> arguments) {
-    final List<String> tags =
-        arguments.map((final arg) => arg.typeTag).toList();
+    final List<String> tags = arguments
+        .map((final arg) => arg.typeTag)
+        .toList();
     return OscTypeTagString._(tags);
   }
 
@@ -23,7 +24,8 @@ class OscTypeTagString {
   factory OscTypeTagString.parse(final String typeTagString) {
     if (typeTagString.isEmpty || !typeTagString.startsWith(',')) {
       throw OscFormatException(
-          'OSC Type Tag String must start with comma: "$typeTagString"');
+        'OSC Type Tag String must start with comma: "$typeTagString"',
+      );
     }
 
     final List<String> tags = <String>[];

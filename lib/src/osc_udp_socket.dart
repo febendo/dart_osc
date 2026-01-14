@@ -128,15 +128,21 @@ class OscUdpSocket {
   /// Returns the number of bytes sent, or -1 if send failed (in event-driven mode)
   /// or throws an exception (in direct mode)
   int sendPacket(
-      final OscPacket packet, final InternetAddress address, final int port) {
+    final OscPacket packet,
+    final InternetAddress address,
+    final int port,
+  ) {
     if (_socket == null) {
       throw StateError('Socket is not bound. Call bind() first.');
     }
 
     try {
       final List<int> bytes = packet.encode();
-      final int result =
-          _socket!.send(Uint8List.fromList(bytes), address, port);
+      final int result = _socket!.send(
+        Uint8List.fromList(bytes),
+        address,
+        port,
+      );
 
       if (result == -1) {
         if (isEventDriven) {
@@ -176,10 +182,14 @@ class OscUdpSocket {
       sendPacket(packet, InternetAddress.loopbackIPv4, port);
 
   Future<int> sendToHost(
-      final OscPacket packet, final String hostname, final int port) async {
+    final OscPacket packet,
+    final String hostname,
+    final int port,
+  ) async {
     try {
-      final List<InternetAddress> addresses =
-          await InternetAddress.lookup(hostname);
+      final List<InternetAddress> addresses = await InternetAddress.lookup(
+        hostname,
+      );
       if (addresses.isEmpty) {
         throw SocketException('Host not found: $hostname');
       }
@@ -357,12 +367,7 @@ class OscUdpSocket {
   }
 
   void _handleSocketError(final error) {
-    _errorController?.add(
-      OscErrorEvent(
-        'Socket error occurred',
-        error: error,
-      ),
-    );
+    _errorController?.add(OscErrorEvent('Socket error occurred', error: error));
   }
 
   void _handleSocketDone() {

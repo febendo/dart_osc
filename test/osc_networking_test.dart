@@ -49,14 +49,15 @@ void main() {
 
         final OscMessage testMessage =
             OscMessage('/test/message', <OscArgument>[
-          OscArgument.int32(42),
-          OscArgument.float32(3.14),
-          OscArgument.string('hello'),
-        ]);
+              OscArgument.int32(42),
+              OscArgument.float32(3.14),
+              OscArgument.string('hello'),
+            ]);
 
         // Set up receiver
-        final Future<OscPacketEvent?> receiveFuture =
-            socket2.receivePacket(Duration(seconds: 2));
+        final Future<OscPacketEvent?> receiveFuture = socket2.receivePacket(
+          Duration(seconds: 2),
+        );
 
         // Give a small delay to ensure receiver is ready
         await Future.delayed(Duration(milliseconds: 10));
@@ -94,12 +95,15 @@ void main() {
           OscMessage('/bundle/msg1', <OscArgument>[OscArgument.int32(1)]),
           OscMessage('/bundle/msg2', <OscArgument>[OscArgument.float32(2)]),
         ];
-        final OscBundle testBundle =
-            OscBundle(OscTimeTag.immediate(), messages);
+        final OscBundle testBundle = OscBundle(
+          OscTimeTag.immediate(),
+          messages,
+        );
 
         // Set up receiver
-        final Future<OscPacketEvent?> receiveFuture =
-            socket2.receivePacket(Duration(seconds: 2));
+        final Future<OscPacketEvent?> receiveFuture = socket2.receivePacket(
+          Duration(seconds: 2),
+        );
 
         // Give a small delay to ensure receiver is ready
         await Future.delayed(Duration(milliseconds: 10));
@@ -132,8 +136,9 @@ void main() {
       test('should timeout when no packet is received', () async {
         await socket1.bind();
 
-        final OscPacketEvent? receivedData =
-            await socket1.receivePacket(Duration(milliseconds: 100));
+        final OscPacketEvent? receivedData = await socket1.receivePacket(
+          Duration(milliseconds: 100),
+        );
         expect(receivedData, isNull);
       });
 
@@ -142,14 +147,19 @@ void main() {
         await socket2.bind();
 
         final OscMessage testMessage = OscMessage(
-            '/localhost/test', <OscArgument>[OscArgument.string('test')]);
+          '/localhost/test',
+          <OscArgument>[OscArgument.string('test')],
+        );
 
-        final Future<OscPacketEvent?> receiveFuture =
-            socket2.receivePacket(Duration(seconds: 2));
+        final Future<OscPacketEvent?> receiveFuture = socket2.receivePacket(
+          Duration(seconds: 2),
+        );
         await Future.delayed(Duration(milliseconds: 10));
 
-        final int bytesSent =
-            await socket1.sendToLocalHost(testMessage, socket2.localPort!);
+        final int bytesSent = await socket1.sendToLocalHost(
+          testMessage,
+          socket2.localPort!,
+        );
         expect(bytesSent, greaterThan(0));
 
         final OscPacketEvent? receivedData = await receiveFuture;
@@ -173,8 +183,8 @@ void main() {
         // Set up stream receiver
         final List<OscPacketEvent> receivedPackets = <OscPacketEvent>[];
         final Stream<OscPacketEvent>? stream = socket2.onPacket;
-        final StreamSubscription<OscPacketEvent>? streamSubscription =
-            stream?.listen(receivedPackets.add);
+        final StreamSubscription<OscPacketEvent>? streamSubscription = stream
+            ?.listen(receivedPackets.add);
 
         // Give time for stream to be ready
         await Future.delayed(Duration(milliseconds: 50));
@@ -203,8 +213,9 @@ void main() {
       });
 
       test('should throw error when sending without binding', () {
-        final OscMessage message =
-            OscMessage('/test', <OscArgument>[OscArgument.int32(1)]);
+        final OscMessage message = OscMessage('/test', <OscArgument>[
+          OscArgument.int32(1),
+        ]);
 
         expect(
           () => socket1.sendPacket(message, InternetAddress.loopbackIPv4, 9000),
@@ -229,8 +240,9 @@ void main() {
 
     group('OscPacketEvent', () {
       test('should provide correct event information', () {
-        final OscMessage message = OscMessage(
-            '/event/test', <OscArgument>[OscArgument.string('data')]);
+        final OscMessage message = OscMessage('/event/test', <OscArgument>[
+          OscArgument.string('data'),
+        ]);
         final DateTime timestamp = DateTime.now();
 
         final OscPacketEvent event = OscPacketEvent(
@@ -302,10 +314,10 @@ void main() {
 
           // Set up stream receiver
           final Stream<OscPacketEvent>? stream = socket2.onPacket;
-          final StreamSubscription<OscPacketEvent>? subscription =
-              stream?.listen((final packetData) {
-            receivedMessages.add(packetData.asMessage);
-          });
+          final StreamSubscription<OscPacketEvent>? subscription = stream
+              ?.listen((final packetData) {
+                receivedMessages.add(packetData.asMessage);
+              });
 
           // Give time for stream to be ready
           await Future.delayed(Duration(milliseconds: 50));
@@ -313,7 +325,9 @@ void main() {
           // Send multiple messages rapidly
           for (int i = 0; i < messageCount; i++) {
             final OscMessage message = OscMessage(
-                '/rapid/test/$i', <OscArgument>[OscArgument.int32(i)]);
+              '/rapid/test/$i',
+              <OscArgument>[OscArgument.int32(i)],
+            );
             socket1.sendPacket(
               message,
               InternetAddress.loopbackIPv4,
@@ -355,11 +369,14 @@ void main() {
             );
           }
 
-          final OscBundle largeBundle =
-              OscBundle(OscTimeTag.immediate(), messages);
+          final OscBundle largeBundle = OscBundle(
+            OscTimeTag.immediate(),
+            messages,
+          );
 
-          final Future<OscPacketEvent?> receiveFuture =
-              socket2.receivePacket(Duration(seconds: 3));
+          final Future<OscPacketEvent?> receiveFuture = socket2.receivePacket(
+            Duration(seconds: 3),
+          );
           await Future.delayed(Duration(milliseconds: 10));
 
           final int bytesSent = socket1.sendPacket(

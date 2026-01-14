@@ -20,7 +20,8 @@ class OscDecoder {
   DecodeResult<int> decodeInt32(final Uint8List bytes, final int offset) {
     if (bytes.length < offset + 4) {
       throw OscDecodingException(
-          'Insufficient bytes for int32 at offset $offset');
+        'Insufficient bytes for int32 at offset $offset',
+      );
     }
 
     final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 4);
@@ -32,7 +33,8 @@ class OscDecoder {
   DecodeResult<double> decodeFloat32(final Uint8List bytes, final int offset) {
     if (bytes.length < offset + 4) {
       throw OscDecodingException(
-          'Insufficient bytes for float32 at offset $offset');
+        'Insufficient bytes for float32 at offset $offset',
+      );
     }
 
     final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 4);
@@ -44,7 +46,8 @@ class OscDecoder {
   DecodeResult<String> decodeString(final Uint8List bytes, final int offset) {
     if (bytes.length <= offset) {
       throw OscDecodingException(
-          'Insufficient bytes for string at offset $offset');
+        'Insufficient bytes for string at offset $offset',
+      );
     }
 
     // Find the null terminator
@@ -58,7 +61,8 @@ class OscDecoder {
 
     if (nullIndex == -1) {
       throw OscDecodingException(
-          'No null terminator found for string at offset $offset');
+        'No null terminator found for string at offset $offset',
+      );
     }
 
     // Extract the string bytes (excluding null terminator)
@@ -81,7 +85,8 @@ class OscDecoder {
     // Validate we have enough bytes for the padding
     if (bytes.length < offset + totalBytes) {
       throw OscDecodingException(
-          'Insufficient bytes for string padding at offset $offset');
+        'Insufficient bytes for string padding at offset $offset',
+      );
     }
 
     return DecodeResult(string, totalBytes);
@@ -105,22 +110,27 @@ class OscDecoder {
 
     if (bytes.length < dataOffset + totalDataBytes) {
       throw OscDecodingException(
-          'Insufficient bytes for blob data at offset $offset');
+        'Insufficient bytes for blob data at offset $offset',
+      );
     }
 
     // Extract the actual data (without padding)
-    final Uint8List data =
-        Uint8List.fromList(bytes.sublist(dataOffset, dataOffset + size));
+    final Uint8List data = Uint8List.fromList(
+      bytes.sublist(dataOffset, dataOffset + size),
+    );
 
     return DecodeResult(data, 4 + totalDataBytes);
   }
 
   /// Decodes an OSC time tag from a 64-bit big-endian value
   DecodeResult<OscTimeTag> decodeTimeTag(
-      final Uint8List bytes, final int offset) {
+    final Uint8List bytes,
+    final int offset,
+  ) {
     if (bytes.length < offset + 8) {
       throw OscDecodingException(
-          'Insufficient bytes for time tag at offset $offset');
+        'Insufficient bytes for time tag at offset $offset',
+      );
     }
 
     final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 8);
@@ -134,7 +144,8 @@ class OscDecoder {
   DecodeResult<int> decodeInt64(final Uint8List bytes, final int offset) {
     if (bytes.length < offset + 8) {
       throw OscDecodingException(
-          'Insufficient bytes for int64 at offset $offset');
+        'Insufficient bytes for int64 at offset $offset',
+      );
     }
 
     final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 8);
@@ -146,7 +157,8 @@ class OscDecoder {
   DecodeResult<double> decodeDouble64(final Uint8List bytes, final int offset) {
     if (bytes.length < offset + 8) {
       throw OscDecodingException(
-          'Insufficient bytes for double64 at offset $offset');
+        'Insufficient bytes for double64 at offset $offset',
+      );
     }
 
     final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 8);
@@ -158,7 +170,8 @@ class OscDecoder {
   DecodeResult<String> decodeChar(final Uint8List bytes, final int offset) {
     if (bytes.length < offset + 4) {
       throw OscDecodingException(
-          'Insufficient bytes for char at offset $offset');
+        'Insufficient bytes for char at offset $offset',
+      );
     }
 
     final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 4);
@@ -176,7 +189,8 @@ class OscDecoder {
   DecodeResult<int> decodeColor(final Uint8List bytes, final int offset) {
     if (bytes.length < offset + 4) {
       throw OscDecodingException(
-          'Insufficient bytes for color at offset $offset');
+        'Insufficient bytes for color at offset $offset',
+      );
     }
 
     final ByteData byteData = ByteData.sublistView(bytes, offset, offset + 4);
@@ -188,7 +202,8 @@ class OscDecoder {
   DecodeResult<List<int>> decodeMidi(final Uint8List bytes, final int offset) {
     if (bytes.length < offset + 4) {
       throw OscDecodingException(
-          'Insufficient bytes for MIDI message at offset $offset');
+        'Insufficient bytes for MIDI message at offset $offset',
+      );
     }
 
     final int portId = bytes[offset];
@@ -213,6 +228,7 @@ class OscDecoder {
 
   /// Decodes Infinitum type (no data allocated) (extended type)
   DecodeResult<double> decodeInfinitum(
-          final Uint8List bytes, final int offset) =>
-      const DecodeResult(double.infinity, 0);
+    final Uint8List bytes,
+    final int offset,
+  ) => const DecodeResult(double.infinity, 0);
 }

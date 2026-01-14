@@ -62,7 +62,8 @@ abstract class OscPacket {
   static void validatePacketSize(final List<int> bytes) {
     if (bytes.length % 4 != 0) {
       throw FormatException(
-          'OSC packet size must be multiple of 4 bytes, got ${bytes.length}');
+        'OSC packet size must be multiple of 4 bytes, got ${bytes.length}',
+      );
     }
   }
 }

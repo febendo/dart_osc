@@ -9,8 +9,8 @@ library;
 class OscAddress {
   /// Creates an OSC Address from a string representation
   OscAddress(final String address)
-      : _address = address,
-        _parts = _parseAddress(address) {
+    : _address = address,
+      _parts = _parseAddress(address) {
     _validateAddress(address);
   }
   final String _address;
@@ -32,21 +32,23 @@ class OscAddress {
       '[',
       ']',
       '{',
-      '}'
+      '}',
     };
 
     for (int i = 0; i < address.length; i++) {
       final String char = address[i];
       if (forbiddenChars.contains(char)) {
         throw ArgumentError(
-            'OSC Address contains forbidden character "$char": "$address"');
+          'OSC Address contains forbidden character "$char": "$address"',
+        );
       }
 
       // Check ASCII range (printable characters)
       final int codeUnit = address.codeUnitAt(i);
       if (codeUnit < 32 || codeUnit > 126) {
         throw ArgumentError(
-            'OSC Address contains non-printable character: "$address"');
+          'OSC Address contains non-printable character: "$address"',
+        );
       }
     }
   }
@@ -157,20 +159,22 @@ class OscAddress {
       '[',
       ']',
       '{',
-      '}'
+      '}',
     };
 
     for (int i = 0; i < part.length; i++) {
       final String char = part[i];
       if (forbiddenChars.contains(char)) {
         throw ArgumentError(
-            'Address part contains forbidden character "$char": "$part"');
+          'Address part contains forbidden character "$char": "$part"',
+        );
       }
 
       final int codeUnit = part.codeUnitAt(i);
       if (codeUnit < 32 || codeUnit > 126) {
         throw ArgumentError(
-            'Address part contains non-printable character: "$part"');
+          'Address part contains non-printable character: "$part"',
+        );
       }
     }
   }

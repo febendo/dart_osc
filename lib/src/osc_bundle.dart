@@ -37,8 +37,9 @@ class OscBundle extends OscPacket {
         // OSC spec: nested bundle time tag must be >= parent time tag
         if (element.timeTag.isBefore(timeTag)) {
           throw ArgumentError(
-              'Nested bundle time tag must be >= parent bundle time tag. '
-              'Parent: ${timeTag.ntpTimestamp}, Child: ${element.timeTag.ntpTimestamp}');
+            'Nested bundle time tag must be >= parent bundle time tag. '
+            'Parent: ${timeTag.ntpTimestamp}, Child: ${element.timeTag.ntpTimestamp}',
+          );
         }
       }
     }
@@ -84,8 +85,10 @@ class OscBundle extends OscPacket {
     int offset = 0;
 
     // Decode and validate bundle identifier
-    final DecodeResult<String> bundleStringResult =
-        decoder.decodeString(bytes, offset);
+    final DecodeResult<String> bundleStringResult = decoder.decodeString(
+      bytes,
+      offset,
+    );
     if (bundleStringResult.value != _bundleString) {
       throw OscFormatException(
         'Invalid bundle identifier: expected "$_bundleString", got "${bundleStringResult.value}"',
@@ -94,8 +97,10 @@ class OscBundle extends OscPacket {
     offset += bundleStringResult.bytesRead;
 
     // Decode time tag
-    final DecodeResult<OscTimeTag> timeTagResult =
-        decoder.decodeTimeTag(bytes, offset);
+    final DecodeResult<OscTimeTag> timeTagResult = decoder.decodeTimeTag(
+      bytes,
+      offset,
+    );
     final OscTimeTag timeTag = timeTagResult.value;
     offset += timeTagResult.bytesRead;
 
@@ -118,8 +123,10 @@ class OscBundle extends OscPacket {
       }
 
       // Extract element bytes
-      final Uint8List elementBytes =
-          bytes.sublist(offset, offset + elementSize);
+      final Uint8List elementBytes = bytes.sublist(
+        offset,
+        offset + elementSize,
+      );
       offset += elementSize;
 
       // Decode element (could be message or nested bundle)
@@ -145,7 +152,8 @@ class OscBundle extends OscPacket {
       return OscMessage.decode(bytes);
     } else {
       throw OscDecodingException(
-          'Invalid bundle element: first byte is ${bytes[0]}');
+        'Invalid bundle element: first byte is ${bytes[0]}',
+      );
     }
   }
 
@@ -204,10 +212,9 @@ class OscBundle extends OscPacket {
 
   /// Returns true if this bundle contains any messages
   bool get hasMessages => elements.any(
-        (final element) =>
-            element is OscMessage ||
-            (element is OscBundle && element.hasMessages),
-      );
+    (final element) =>
+        element is OscMessage || (element is OscBundle && element.hasMessages),
+  );
 
   /// Returns true if this bundle contains any nested bundles
   bool get hasNestedBundles =>

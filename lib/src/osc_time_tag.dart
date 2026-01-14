@@ -29,7 +29,8 @@ class OscTimeTag {
 
     // Calculate fractional seconds from microseconds
     final int microseconds = utc.microsecond;
-    final double fractionOfSecond = (microseconds * 1000) /
+    final double fractionOfSecond =
+        (microseconds * 1000) /
         1000000.0; // Convert to nanoseconds then to fraction
     final int ntpFraction = (fractionOfSecond * 0x100000000).round();
 

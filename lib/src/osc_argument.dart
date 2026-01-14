@@ -31,7 +31,8 @@ class OscArgument {
       final int codeUnit = value.codeUnitAt(i);
       if (codeUnit > 127 || codeUnit == 0) {
         throw OscArgumentException(
-            'OSC string must contain only non-null ASCII characters: "$value"');
+          'OSC string must contain only non-null ASCII characters: "$value"',
+        );
       }
     }
     return OscArgument._('s', value);
@@ -73,7 +74,8 @@ class OscArgument {
       final int codeUnit = value.codeUnitAt(i);
       if (codeUnit > 127 || codeUnit == 0) {
         throw OscArgumentException(
-            'OSC symbol must contain only non-null ASCII characters: "$value"');
+          'OSC symbol must contain only non-null ASCII characters: "$value"',
+        );
       }
     }
     return OscArgument._('S', value);
@@ -83,7 +85,8 @@ class OscArgument {
   factory OscArgument.char(final String value) {
     if (value.length != 1) {
       throw OscArgumentException(
-          'char argument must be exactly one character: "$value"');
+        'char argument must be exactly one character: "$value"',
+      );
     }
     final int codeUnit = value.codeUnitAt(0);
     if (codeUnit > 127) {
@@ -96,14 +99,19 @@ class OscArgument {
   factory OscArgument.color(final int rgba) {
     if (rgba < 0 || rgba > 0xFFFFFFFF) {
       throw OscArgumentException(
-          'RGBA color must be in range 0x00000000 to 0xFFFFFFFF: $rgba');
+        'RGBA color must be in range 0x00000000 to 0xFFFFFFFF: $rgba',
+      );
     }
     return OscArgument._('r', rgba);
   }
 
   /// Creates a MIDI message argument (type tag 'm') - extended type
-  factory OscArgument.midi(final int portId, final int statusByte,
-      final int data1, final int data2) {
+  factory OscArgument.midi(
+    final int portId,
+    final int statusByte,
+    final int data1,
+    final int data2,
+  ) {
     if (portId < 0 || portId > 255) {
       throw OscArgumentException('MIDI port ID must be 0-255: $portId');
     }

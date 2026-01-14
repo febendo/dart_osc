@@ -34,7 +34,8 @@ class OscEncoder {
       final int codeUnit = value.codeUnitAt(i);
       if (codeUnit > 127 || codeUnit == 0) {
         throw ArgumentError(
-            'OSC-string must contain only non-null ASCII characters: "$value"');
+          'OSC-string must contain only non-null ASCII characters: "$value"',
+        );
       }
     }
 
@@ -48,7 +49,7 @@ class OscEncoder {
     final int padding = (4 - (nullTerminated.length % 4)) % 4;
     final List<int> padded = <int>[
       ...nullTerminated,
-      ...List.filled(padding, 0)
+      ...List.filled(padding, 0),
     ];
 
     return padded;
@@ -107,7 +108,8 @@ class OscEncoder {
   List<int> encodeColor(final int rgba) {
     if (rgba < 0 || rgba > 0xFFFFFFFF) {
       throw ArgumentError(
-          'RGBA color must be in range 0x00000000 to 0xFFFFFFFF: $rgba');
+        'RGBA color must be in range 0x00000000 to 0xFFFFFFFF: $rgba',
+      );
     }
 
     final ByteData bytes = ByteData(4);
@@ -116,8 +118,12 @@ class OscEncoder {
   }
 
   /// Encodes a 4-byte MIDI message (extended type)
-  List<int> encodeMidi(final int portId, final int statusByte, final int data1,
-      final int data2) {
+  List<int> encodeMidi(
+    final int portId,
+    final int statusByte,
+    final int data1,
+    final int data2,
+  ) {
     if (portId < 0 || portId > 255) {
       throw ArgumentError('MIDI port ID must be 0-255: $portId');
     }
