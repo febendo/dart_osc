@@ -105,6 +105,7 @@ This table shows the parts of a two-or-more-element OSC Bundle and the size (in 
 
 Parts of an OSC Bundle
 | Data | Size | Purpose |
+|:-|:-|:-|
 | OSC-string “#bundle” | 8 bytes	How to know that this data is a bundle |
 | OSC-timetag | 8 bytes	Time tag that applies to the entire bundle |
 | Size of first bundle element | int32 = 4 bytes |
