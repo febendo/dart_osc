@@ -7,7 +7,7 @@
 /// - Pattern matching for address dispatching
 /// - Encoding/decoding of all OSC data types
 /// - Support for both standard and extended OSC types
-library dart_osc;
+library;
 
 // OSC Addresses and pattern matching
 export 'src/osc_address.dart';
