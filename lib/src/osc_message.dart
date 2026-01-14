@@ -78,7 +78,7 @@ class OscMessage extends OscPacket {
       case 'h':
         return encoder.encodeInt64(argument.value as int);
       case 't':
-        return encoder.encodeTimeTag(argument.value);
+        return encoder.encodeTimeTag(argument.value as OscTimeTag);
       case 'd':
         return encoder.encodeDouble64(argument.value as double);
       case 'S':
