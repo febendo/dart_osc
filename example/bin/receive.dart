@@ -1,6 +1,8 @@
 // Listens for OSC messages on a UDP port and prints them.
 // Run this first, then run send.dart in another terminal.
 // Press Ctrl-C to stop.
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:dart_osc/dart_osc.dart';
 
@@ -14,11 +16,13 @@ void main() async {
   socket.onPacket!.listen((event) {
     if (event.isMessage) {
       final msg = event.asMessage;
-      final args = msg.arguments.map((a) => '${a.typeTag}:${a.value}').join(', ');
+      final args =
+          msg.arguments.map((a) => '${a.typeTag}:${a.value}').join(', ');
       print('[message] ${msg.addressPattern}  ($args)');
     } else if (event.isBundle) {
       final bundle = event.asBundle;
-      print('[bundle]  ${bundle.elements.length} element(s), time: ${bundle.timeTag}');
+      print(
+          '[bundle]  ${bundle.elements.length} element(s), time: ${bundle.timeTag}');
       for (final el in bundle.getAllMessages()) {
         print('  - ${el.addressPattern}');
       }

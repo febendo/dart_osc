@@ -15,7 +15,7 @@ import 'package:dart_osc/src/osc_address.dart';
 /// - '{foo,bar}' matches any of the alternative strings
 class OscAddressPattern {
   /// Creates an OSC Address Pattern from a string representation
-  OscAddressPattern(final String pattern)
+  OscAddressPattern(String pattern)
       : _pattern = pattern,
         _parts = _parsePattern(pattern) {
     _validatePattern(pattern);
@@ -24,7 +24,7 @@ class OscAddressPattern {
   final List<String> _parts;
 
   /// Validates that the pattern string is a valid OSC address pattern
-  static void _validatePattern(final String pattern) {
+  static void _validatePattern(String pattern) {
     if (pattern.isEmpty || !pattern.startsWith('/')) {
       throw ArgumentError(
         'OSC Address Pattern must start with "/": "$pattern"',
@@ -40,7 +40,7 @@ class OscAddressPattern {
   }
 
   /// Validates forbidden characters outside of valid pattern contexts
-  static void _validateForbiddenCharacters(final String pattern) {
+  static void _validateForbiddenCharacters(String pattern) {
     var inBraces = false;
     const forbiddenChars = <String>{' ', '#'};
 
@@ -79,7 +79,7 @@ class OscAddressPattern {
   }
 
   /// Validates that brackets are properly matched and formed
-  static void _validateBrackets(final String pattern) {
+  static void _validateBrackets(String pattern) {
     var bracketDepth = 0;
     var inBrackets = false;
     var bracketStart = -1;
@@ -118,8 +118,8 @@ class OscAddressPattern {
 
   /// Validates character class content
   static void _validateCharacterClass(
-    final String content,
-    final String fullPattern,
+    String content,
+    String fullPattern,
   ) {
     // Check for invalid ranges (e.g., z-a, 9-0)
     for (var i = 0; i < content.length - 2; i++) {
@@ -136,7 +136,7 @@ class OscAddressPattern {
   }
 
   /// Validates that braces are properly matched
-  static void _validateBraces(final String pattern) {
+  static void _validateBraces(String pattern) {
     var braceDepth = 0;
     var inBraces = false;
 
@@ -162,7 +162,7 @@ class OscAddressPattern {
   }
 
   /// Parses the pattern string into its component parts
-  static List<String> _parsePattern(final String pattern) {
+  static List<String> _parsePattern(String pattern) {
     if (pattern == '/') {
       return <String>[];
     }
@@ -187,7 +187,7 @@ class OscAddressPattern {
   String? get methodName => _parts.isEmpty ? null : _parts.last;
 
   /// Tests if this pattern matches the given OSC address
-  bool matches(final OscAddress address) {
+  bool matches(OscAddress address) {
     // Both must have the same number of parts
     if (_parts.length != address.parts.length) {
       return false;
@@ -204,14 +204,14 @@ class OscAddressPattern {
   }
 
   /// Tests if a pattern part matches an address part
-  static bool _matchesPart(final String pattern, final String address) =>
+  static bool _matchesPart(String pattern, String address) =>
       _matchesPattern(pattern, address, 0, 0);
 
   /// Recursive pattern matching implementation
   static bool _matchesPattern(
-    final String pattern,
-    final String address,
-    final int patternIndex,
+    String pattern,
+    String address,
+    int patternIndex,
     int addressIndex,
   ) {
     // Base cases
@@ -317,8 +317,8 @@ class OscAddressPattern {
 
   /// Tests if a character matches a character class
   static bool _matchesCharacterClass(
-    final String classContent,
-    final String char,
+    String classContent,
+    String char,
   ) {
     if (char.length != 1) return false;
 
@@ -358,7 +358,7 @@ class OscAddressPattern {
   }
 
   @override
-  bool operator ==(final Object other) =>
+  bool operator ==(Object other) =>
       other is OscAddressPattern && other._pattern == _pattern;
 
   @override

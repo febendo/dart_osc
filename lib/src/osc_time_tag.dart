@@ -19,7 +19,7 @@ class OscTimeTag {
   ///
   /// Note: This loses some precision due to DateTime's microsecond resolution
   /// vs NTP's ~200 picosecond resolution
-  factory OscTimeTag.fromDateTime(final DateTime dateTime) {
+  factory OscTimeTag.fromDateTime(DateTime dateTime) {
     // Convert to UTC if not already
     final utc = dateTime.toUtc();
 
@@ -43,6 +43,7 @@ class OscTimeTag {
       2208988800; // Seconds between 1900 and 1970
   static const int _immediateTimestamp = 0x0000000000000001;
 
+  /// The raw NTP timestamp value of this time tag
   final int ntpTimestamp;
 
   /// Returns true if this is an "immediate" time tag
@@ -79,7 +80,7 @@ class OscTimeTag {
   int get fraction => ntpTimestamp & 0xFFFFFFFF;
 
   @override
-  bool operator ==(final Object other) =>
+  bool operator ==(Object other) =>
       other is OscTimeTag && other.ntpTimestamp == ntpTimestamp;
 
   @override
@@ -101,7 +102,7 @@ class OscTimeTag {
   /// positive if this is after other
   ///
   /// Immediate time tags are considered "before" all other time tags
-  int compareTo(final OscTimeTag other) {
+  int compareTo(OscTimeTag other) {
     if (isImmediate && other.isImmediate) return 0;
     if (isImmediate) return -1;
     if (other.isImmediate) return 1;
@@ -110,14 +111,14 @@ class OscTimeTag {
   }
 
   /// Returns true if this time tag is before the other
-  bool isBefore(final OscTimeTag other) => compareTo(other) < 0;
+  bool isBefore(OscTimeTag other) => compareTo(other) < 0;
 
   /// Returns true if this time tag is after the other
-  bool isAfter(final OscTimeTag other) => compareTo(other) > 0;
+  bool isAfter(OscTimeTag other) => compareTo(other) > 0;
 
   /// Returns true if this time tag is before or equal to the other
-  bool isBeforeOrEqual(final OscTimeTag other) => compareTo(other) <= 0;
+  bool isBeforeOrEqual(OscTimeTag other) => compareTo(other) <= 0;
 
   /// Returns true if this time tag is after or equal to the other
-  bool isAfterOrEqual(final OscTimeTag other) => compareTo(other) >= 0;
+  bool isAfterOrEqual(OscTimeTag other) => compareTo(other) >= 0;
 }

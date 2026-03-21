@@ -143,7 +143,7 @@ class OscArgument {
   ///
   /// This is used internally for decoding. The value should already be
   /// the correct Dart type for the given type tag.
-  factory OscArgument.fromTypeAndValue(final String typeTag, final value) {
+  factory OscArgument.fromTypeAndValue(String typeTag, dynamic value) {
     switch (typeTag) {
       case 'i':
         return OscArgument.int32(value as int);

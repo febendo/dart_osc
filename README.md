@@ -300,7 +300,7 @@ final socket = OscUdpSocket();
 await socket.bind(port: 9000);
 
 // Configure socket options
-socket.setBroadcast(true);  // Enable broadcast
+socket.setBroadcast(enabled: true);  // Enable broadcast
 socket.setReceiveBufferSize(16384);  // Set buffer sizes
 socket.setSendBufferSize(16384);
 

@@ -59,7 +59,7 @@ void main() {
         );
 
         // Give a small delay to ensure receiver is ready
-        await Future.delayed(const Duration(milliseconds: 10));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
 
         // Send message
         final bytesSent = socket1.sendPacket(
@@ -105,7 +105,7 @@ void main() {
         );
 
         // Give a small delay to ensure receiver is ready
-        await Future.delayed(const Duration(milliseconds: 10));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
 
         // Send bundle
         final bytesSent = socket1.sendPacket(
@@ -153,7 +153,7 @@ void main() {
         final receiveFuture = socket2.receivePacket(
           const Duration(seconds: 2),
         );
-        await Future.delayed(const Duration(milliseconds: 10));
+        await Future<void>.delayed(const Duration(milliseconds: 10));
 
         final bytesSent = await socket1.sendToLocalHost(
           testMessage,
@@ -185,7 +185,7 @@ void main() {
         final streamSubscription = stream?.listen(receivedPackets.add);
 
         // Give time for stream to be ready
-        await Future.delayed(const Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
         // Send multiple messages
         for (final message in messages) {
@@ -194,12 +194,11 @@ void main() {
             InternetAddress.loopbackIPv4,
             socket2.localPort!,
           );
-          await Future.delayed(const Duration(milliseconds: 10));
+          await Future<void>.delayed(const Duration(milliseconds: 10));
         }
 
         // Wait for all messages to be received
-        await Future.delayed(const Duration(milliseconds: 100));
-
+        await Future<void>.delayed(const Duration(milliseconds: 100));
         await streamSubscription?.cancel();
 
         expect(receivedPackets.length, equals(3));
@@ -232,7 +231,7 @@ void main() {
         await socket1.bind();
 
         // These should not throw errors
-        expect(() => socket1.setBroadcast(true), returnsNormally);
+        expect(() => socket1.setBroadcast(enabled: true), returnsNormally);
       });
     });
 
@@ -297,9 +296,9 @@ void main() {
         socket2 = OscUdpSocket();
       });
 
-      tearDown(() {
-        socket1.close();
-        socket2.close();
+      tearDown(() async {
+        await socket1.close();
+        await socket2.close();
       });
 
       test('should handle rapid message exchange', () async {
@@ -312,12 +311,12 @@ void main() {
 
           // Set up stream receiver
           final stream = socket2.onPacket;
-          final subscription = stream?.listen((final packetData) {
+          final subscription = stream?.listen((packetData) {
             receivedMessages.add(packetData.asMessage);
           });
 
           // Give time for stream to be ready
-          await Future.delayed(const Duration(milliseconds: 50));
+          await Future<void>.delayed(const Duration(milliseconds: 50));
 
           // Send multiple messages rapidly
           for (var i = 0; i < messageCount; i++) {
@@ -333,7 +332,7 @@ void main() {
           }
 
           // Wait for all messages to be received
-          await Future.delayed(const Duration(milliseconds: 200));
+          await Future<void>.delayed(const Duration(milliseconds: 200));
 
           expect(receivedMessages.length, equals(messageCount));
           for (var i = 0; i < messageCount; i++) {
@@ -344,8 +343,8 @@ void main() {
 
           await subscription?.cancel();
         } finally {
-          socket1.close();
-          socket2.close();
+          await socket1.close();
+          await socket2.close();
         }
       });
 
@@ -374,7 +373,7 @@ void main() {
           final receiveFuture = socket2.receivePacket(
             const Duration(seconds: 3),
           );
-          await Future.delayed(const Duration(milliseconds: 10));
+          await Future<void>.delayed(const Duration(milliseconds: 10));
 
           final bytesSent = socket1.sendPacket(
             largeBundle,
@@ -401,8 +400,8 @@ void main() {
             equals('/large/bundle/msg/49'),
           );
         } finally {
-          socket1.close();
-          socket2.close();
+          await socket1.close();
+          await socket2.close();
         }
       });
     });

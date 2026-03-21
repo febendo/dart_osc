@@ -8,7 +8,7 @@ library;
 /// all containers and the method, separated by forward slashes.
 class OscAddress {
   /// Creates an OSC Address from a string representation
-  OscAddress(final String address)
+  OscAddress(String address)
       : _address = address,
         _parts = _parseAddress(address) {
     _validateAddress(address);
@@ -17,7 +17,7 @@ class OscAddress {
   final List<String> _parts;
 
   /// Validates that the address string is a valid OSC address
-  static void _validateAddress(final String address) {
+  static void _validateAddress(String address) {
     if (address.isEmpty || !address.startsWith('/')) {
       throw ArgumentError('OSC Address must start with "/": "$address"');
     }
@@ -54,7 +54,7 @@ class OscAddress {
   }
 
   /// Parses the address string into its component parts
-  static List<String> _parseAddress(final String address) {
+  static List<String> _parseAddress(String address) {
     if (address == '/') {
       return <String>[];
     }
@@ -95,7 +95,7 @@ class OscAddress {
   bool get isRoot => _address == '/';
 
   /// Returns true if this address is a direct child of the given parent
-  bool isChildOf(final OscAddress parent) {
+  bool isChildOf(OscAddress parent) {
     if (parent.isRoot) {
       return _parts.length == 1;
     }
@@ -114,7 +114,7 @@ class OscAddress {
   }
 
   /// Returns true if this address is a descendant of the given ancestor
-  bool isDescendantOf(final OscAddress ancestor) {
+  bool isDescendantOf(OscAddress ancestor) {
     if (ancestor.isRoot) {
       return !isRoot;
     }
@@ -133,7 +133,7 @@ class OscAddress {
   }
 
   /// Creates a child address by appending a name
-  OscAddress child(final String name) {
+  OscAddress child(String name) {
     _validateAddressPart(name);
 
     if (isRoot) {
@@ -144,7 +144,7 @@ class OscAddress {
   }
 
   /// Validates that a string is a valid address part (no forbidden characters)
-  static void _validateAddressPart(final String part) {
+  static void _validateAddressPart(String part) {
     if (part.isEmpty) {
       throw ArgumentError('Address part cannot be empty');
     }
@@ -183,12 +183,12 @@ class OscAddress {
   int get depth => _parts.length;
 
   @override
-  bool operator ==(final Object other) =>
+  bool operator ==(Object other) =>
       other is OscAddress && other._address == _address;
 
   @override
   int get hashCode => _address.hashCode;
 
   /// Compares two addresses lexicographically
-  int compareTo(final OscAddress other) => _address.compareTo(other._address);
+  int compareTo(OscAddress other) => _address.compareTo(other._address);
 }

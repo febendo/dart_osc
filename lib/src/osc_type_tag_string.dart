@@ -10,8 +10,8 @@ import 'package:dart_osc/src/osc_exceptions.dart';
 /// characters corresponding to the types of OSC Arguments in a message.
 class OscTypeTagString {
   /// Creates a type tag string from a list of OSC arguments
-  factory OscTypeTagString(final List<OscArgument> arguments) {
-    final tags = arguments.map((final arg) => arg.typeTag).toList();
+  factory OscTypeTagString(List<OscArgument> arguments) {
+    final tags = arguments.map((arg) => arg.typeTag).toList();
     return OscTypeTagString._(tags);
   }
 
@@ -19,7 +19,7 @@ class OscTypeTagString {
   const OscTypeTagString._(this.tags);
 
   /// Creates a type tag string by parsing a string representation
-  factory OscTypeTagString.parse(final String typeTagString) {
+  factory OscTypeTagString.parse(String typeTagString) {
     if (typeTagString.isEmpty || !typeTagString.startsWith(',')) {
       throw OscFormatException(
         'OSC Type Tag String must start with comma: "$typeTagString"',
@@ -38,6 +38,8 @@ class OscTypeTagString {
 
   /// Creates an empty type tag string (just the comma)
   factory OscTypeTagString.empty() => const OscTypeTagString._(<String>[]);
+
+  /// The list of type tags (without the leading comma)
   final List<String> tags;
 
   /// Returns the number of type tags
@@ -50,7 +52,7 @@ class OscTypeTagString {
   bool get isNotEmpty => tags.isNotEmpty;
 
   /// Returns the type tag at the given index
-  String operator [](final int index) => tags[index];
+  String operator [](int index) => tags[index];
 
   /// Returns an iterator over the type tags
   Iterator<String> get iterator => tags.iterator;
@@ -65,7 +67,7 @@ class OscTypeTagString {
   }
 
   /// Returns true if the given character is a valid OSC type tag
-  static bool _isValidTypeTag(final String tag) {
+  static bool _isValidTypeTag(String tag) {
     if (tag.length != 1) return false;
 
     // Standard OSC 1.0 types
@@ -96,7 +98,7 @@ class OscTypeTagString {
   String toString() => ',${tags.join()}';
 
   @override
-  bool operator ==(final Object other) {
+  bool operator ==(Object other) {
     if (other is! OscTypeTagString) return false;
     if (tags.length != other.tags.length) return false;
 
@@ -111,26 +113,25 @@ class OscTypeTagString {
   int get hashCode => Object.hashAll(tags);
 
   /// Creates a copy of this type tag string with additional tags appended
-  OscTypeTagString append(final String typeTag) =>
+  OscTypeTagString append(String typeTag) =>
       OscTypeTagString._(<String>[...tags, typeTag]);
 
   /// Creates a copy of this type tag string with multiple tags appended
-  OscTypeTagString appendAll(final List<String> typeTags) =>
+  OscTypeTagString appendAll(List<String> typeTags) =>
       OscTypeTagString._(<String>[...tags, ...typeTags]);
 
   /// Returns a sublist of type tags
-  OscTypeTagString sublist(final int start, [final int? end]) =>
+  OscTypeTagString sublist(int start, [int? end]) =>
       OscTypeTagString._(tags.sublist(start, end));
 
   /// Returns true if this type tag string contains the given tag
-  bool contains(final String typeTag) => tags.contains(typeTag);
+  bool contains(String typeTag) => tags.contains(typeTag);
 
   /// Returns the index of the first occurrence of the given tag, or -1 if not found
-  int indexOf(final String typeTag, [final int start = 0]) =>
-      tags.indexOf(typeTag, start);
+  int indexOf(String typeTag, [int start = 0]) => tags.indexOf(typeTag, start);
 
   /// Returns the index of the last occurrence of the given tag, or -1 if not found
-  int lastIndexOf(final String typeTag, [final int? start]) =>
+  int lastIndexOf(String typeTag, [int? start]) =>
       tags.lastIndexOf(typeTag, start);
 
   /// Converts this type tag string to a list of strings

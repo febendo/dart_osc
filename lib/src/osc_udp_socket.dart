@@ -16,8 +16,9 @@ import 'package:dart_osc/src/osc_packet.dart';
 /// approaches for maximum flexibility.
 class OscUdpSocket {
   RawDatagramSocket? _socket;
-  StreamSubscription? _socketSubscription;
-  final List<StreamSubscription> _subscriptions = <StreamSubscription>[];
+  StreamSubscription<RawSocketEvent>? _socketSubscription;
+  final List<StreamSubscription<RawSocketEvent>> _subscriptions =
+      <StreamSubscription<RawSocketEvent>>[];
 
   // Stream controllers for event-driven approach
   StreamController<OscPacketEvent>? _packetController;
@@ -53,12 +54,12 @@ class OscUdpSocket {
   /// [reusePort] - Whether to allow port reuse (defaults to false)
   /// [ttl] - Time-to-live for multicast packets (defaults to 1)
   Future<void> bind({
-    final int port = 0,
-    final InternetAddress? address,
-    final bool eventDriven = false,
-    final bool reuseAddress = true,
-    final bool reusePort = false,
-    final int ttl = 1,
+    int port = 0,
+    InternetAddress? address,
+    bool eventDriven = false,
+    bool reuseAddress = true,
+    bool reusePort = false,
+    int ttl = 1,
   }) async {
     if (_socket != null) {
       throw StateError('Socket is already bound');
@@ -92,14 +93,14 @@ class OscUdpSocket {
   }
 
   /// Disables event-driven mode and stops automatic packet handling
-  void disableEventDrivenMode() {
-    _socketSubscription?.cancel();
+  Future<void> disableEventDrivenMode() async {
+    await _socketSubscription?.cancel();
     _socketSubscription = null;
 
-    _packetController?.close();
+    await _packetController?.close();
     _packetController = null;
 
-    _errorController?.close();
+    await _errorController?.close();
     _errorController = null;
   }
 
@@ -112,7 +113,7 @@ class OscUdpSocket {
     _subscriptions.clear();
 
     // Disable event-driven mode
-    disableEventDrivenMode();
+    await disableEventDrivenMode();
 
     // Close the socket
     _socket?.close();
@@ -128,9 +129,9 @@ class OscUdpSocket {
   /// Returns the number of bytes sent, or -1 if send failed (in event-driven mode)
   /// or throws an exception (in direct mode)
   int sendPacket(
-    final OscPacket packet,
-    final InternetAddress address,
-    final int port,
+    OscPacket packet,
+    InternetAddress address,
+    int port,
   ) {
     if (_socket == null) {
       throw StateError('Socket is not bound. Call bind() first.');
@@ -178,13 +179,14 @@ class OscUdpSocket {
   }
 
   /// Convenience methods for sending
-  Future<int> sendToLocalHost(final OscPacket packet, final int port) async =>
+  Future<int> sendToLocalHost(OscPacket packet, int port) async =>
       sendPacket(packet, InternetAddress.loopbackIPv4, port);
 
+  /// Sends an OSC packet to a hostname on the specified port
   Future<int> sendToHost(
-    final OscPacket packet,
-    final String hostname,
-    final int port,
+    OscPacket packet,
+    String hostname,
+    int port,
   ) async {
     try {
       final addresses = await InternetAddress.lookup(
@@ -210,17 +212,10 @@ class OscUdpSocket {
     }
   }
 
-  // Future<int> sendMessage(
-  //         OscMessage message, InternetAddress address, int port) =>
-  //     sendPacket(message, address, port);
-
-  // Future<int> sendBundle(OscBundle bundle, InternetAddress address, int port) =>
-  //     sendPacket(bundle, address, port);
-
   /// Receives a single OSC packet (only available in direct mode)
   ///
   /// [timeout] - Maximum time to wait for a packet
-  Future<OscPacketEvent?> receivePacket([final Duration? timeout]) async {
+  Future<OscPacketEvent?> receivePacket([Duration? timeout]) async {
     if (_socket == null) {
       throw StateError('Socket is not bound. Call bind() first.');
     }
@@ -242,13 +237,13 @@ class OscUdpSocket {
       });
     }
 
-    late StreamSubscription subscription;
-    subscription = _socket!.listen((final event) {
+    late StreamSubscription<RawSocketEvent> subscription;
+    subscription = _socket!.listen((event) async {
       if (event == RawSocketEvent.read) {
         final datagram = _socket!.receive();
         if (datagram != null && !completer.isCompleted) {
           timer?.cancel();
-          subscription.cancel();
+          await subscription.cancel();
 
           try {
             final packet = OscPacket.decode(datagram.data);
@@ -273,14 +268,14 @@ class OscUdpSocket {
       return await completer.future;
     } finally {
       timer?.cancel();
-      subscription.cancel();
+      await subscription.cancel();
     }
   }
 
   /// Multicast support
   Future<void> joinMulticast(
-    final InternetAddress group, [
-    final NetworkInterface? interface,
+    InternetAddress group, [
+    NetworkInterface? interface,
   ]) async {
     if (_socket == null) {
       throw StateError('Socket is not bound. Call bind() first.');
@@ -301,9 +296,10 @@ class OscUdpSocket {
     }
   }
 
+  /// Multicast support
   Future<void> leaveMulticast(
-    final InternetAddress group, [
-    final NetworkInterface? interface,
+    InternetAddress group, [
+    NetworkInterface? interface,
   ]) async {
     if (_socket == null) {
       throw StateError('Socket is not bound. Call bind() first.');
@@ -325,7 +321,7 @@ class OscUdpSocket {
   }
 
   /// Socket configuration
-  void setBroadcast(final bool enabled) {
+  void setBroadcast({required bool enabled}) {
     if (_socket == null) {
       throw StateError('Socket is not bound. Call bind() first.');
     }
@@ -333,7 +329,7 @@ class OscUdpSocket {
   }
 
   // Event-driven mode handlers
-  void _handleSocketEvent(final RawSocketEvent event) {
+  void _handleSocketEvent(RawSocketEvent event) {
     if (event == RawSocketEvent.read) {
       final datagram = _socket!.receive();
       if (datagram != null) {
@@ -342,7 +338,7 @@ class OscUdpSocket {
     }
   }
 
-  void _handleIncomingDatagram(final Datagram datagram) {
+  void _handleIncomingDatagram(Datagram datagram) {
     try {
       final packet = OscPacket.decode(datagram.data);
       _packetController?.add(
@@ -366,7 +362,7 @@ class OscUdpSocket {
     }
   }
 
-  void _handleSocketError(final error) {
+  void _handleSocketError(dynamic error) {
     _errorController?.add(OscErrorEvent('Socket error occurred', error: error));
   }
 
@@ -378,6 +374,7 @@ class OscUdpSocket {
 
 // Keep the same event classes from OscUdpClient
 class OscPacketEvent {
+  /// Creates an event for a received OSC packet with details about the source and timestamp
   const OscPacketEvent(
     this.packet, {
     required this.remoteAddress,
@@ -385,19 +382,31 @@ class OscPacketEvent {
     required this.timestamp,
   });
 
+  /// The decoded OSC packet
   final OscPacket packet;
+
+  /// The remote address the packet was received from
   final InternetAddress remoteAddress;
+
+  /// The remote port the packet was received from
   final int remotePort;
+
+  /// The timestamp when the packet was received
   final DateTime timestamp;
 
+  /// Convenience getters for packet type
   bool get isMessage => packet.isMessage;
+
+  /// Convenience getters for packet type
   bool get isBundle => packet.isBundle;
 
+  /// Casts the packet to OscMessage if it is a message, otherwise throws
   OscMessage get asMessage {
     if (!isMessage) throw StateError('Packet is not a message');
     return packet as OscMessage;
   }
 
+  /// Casts the packet to OscBundle if it is a bundle, otherwise throws
   OscBundle get asBundle {
     if (!isBundle) throw StateError('Packet is not a bundle');
     return packet as OscBundle;
@@ -409,6 +418,7 @@ class OscPacketEvent {
 }
 
 class OscErrorEvent {
+  /// Creates an error event with optional details about the error and context
   OscErrorEvent(
     this.message, {
     this.error,
@@ -417,11 +427,22 @@ class OscErrorEvent {
     this.rawData,
   }) : timestamp = DateTime.now();
 
+  /// A human-readable message describing the error
   final String message;
+
+  /// The original error object, if available
   final dynamic error;
+
+  /// The remote address involved in the error, if applicable
   final InternetAddress? remoteAddress;
+
+  /// The remote port involved in the error, if applicable
   final int? remotePort;
+
+  /// The raw data that caused the error, if applicable
   final Uint8List? rawData;
+
+  /// The timestamp when the error occurred
   final DateTime timestamp;
 
   @override

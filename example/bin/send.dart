@@ -1,5 +1,7 @@
 // Sends a few OSC messages to localhost:9000.
 // Run receive.dart in another terminal first.
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:dart_osc/dart_osc.dart';
 
@@ -10,10 +12,11 @@ void main() async {
   await socket.bind();
 
   final messages = [
-    OscMessage('/synth/frequency', [OscArgument.float32(440.0)]),
+    OscMessage('/synth/frequency', [OscArgument.float32(440)]),
     OscMessage('/synth/amplitude', [OscArgument.float32(0.8)]),
     OscMessage('/synth/waveform', [OscArgument.string('saw')]),
-    OscMessage('/synth/note', [OscArgument.int32(69), OscArgument.float32(0.9)]),
+    OscMessage(
+        '/synth/note', [OscArgument.int32(69), OscArgument.float32(0.9)]),
   ];
 
   for (final msg in messages) {
