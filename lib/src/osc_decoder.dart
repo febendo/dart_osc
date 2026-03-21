@@ -72,7 +72,8 @@ class OscDecoder {
     for (final byte in stringBytes) {
       if (byte > 127) {
         throw const OscDecodingException(
-            'Non-ASCII character found in OSC string');
+          'Non-ASCII character found in OSC string',
+        );
       }
     }
 
