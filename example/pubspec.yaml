@@ -1,0 +1,14 @@
+name: dart_osc_example
+description: Example scripts for dart_osc.
+version: 1.0.0
+publish_to: none
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  dart_osc:
+    path: ../
+
+dev_dependencies:
+  lints: ^6.0.0
