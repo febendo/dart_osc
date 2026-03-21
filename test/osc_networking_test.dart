@@ -36,7 +36,7 @@ void main() {
         await socket1.bind();
         expect(socket1.isBound, isTrue);
 
-        socket1.close();
+        await socket1.close();
         expect(socket1.isBound, isFalse);
         expect(socket1.localPort, isNull);
         expect(socket1.localAddress, isNull);
