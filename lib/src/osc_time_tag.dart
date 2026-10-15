@@ -17,8 +17,8 @@ class OscTimeTag {
 
   /// Creates an OSC Time Tag from a DateTime
   ///
-  /// Note: This loses some precision due to DateTime's microsecond resolution
-  /// vs NTP's ~200 picosecond resolution
+  /// The time tag is exact to the microsecond, which is the finest
+  /// resolution of [DateTime]. NTP time tags can be finer (about 233 ps).
   factory OscTimeTag.fromDateTime(DateTime dateTime) {
     // microsecondsSinceEpoch is independent of the time zone
     final microsSinceEpoch = dateTime.microsecondsSinceEpoch;
@@ -53,6 +53,9 @@ class OscTimeTag {
   ///
   /// Returns null for immediate time tags since they don't represent
   /// a specific point in time
+  ///
+  /// The fraction of a second is rounded to the nearest microsecond, the
+  /// finest resolution of [DateTime], so finer NTP precision is lost.
   DateTime? toDateTime() {
     if (isImmediate) return null;
 
