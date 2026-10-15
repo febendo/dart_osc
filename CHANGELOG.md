@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- `OscTimeTag.fromDateTime` (and `OscTimeTag.now`) now keep the milliseconds of
+  a `DateTime` in the fraction of a second. Previously only the microseconds
+  within the current millisecond were used, so time tags could be up to ±1 s
+  off. Times before 1970 with a fraction of a second are also converted
+  correctly now.
+
 ## [1.0.0] - 2026-03-22
 
 ### Added

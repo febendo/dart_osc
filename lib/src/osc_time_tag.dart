@@ -20,18 +20,18 @@ class OscTimeTag {
   /// Note: This loses some precision due to DateTime's microsecond resolution
   /// vs NTP's ~200 picosecond resolution
   factory OscTimeTag.fromDateTime(DateTime dateTime) {
-    // Convert to UTC if not already
-    final utc = dateTime.toUtc();
+    // microsecondsSinceEpoch is independent of the time zone
+    final microsSinceEpoch = dateTime.microsecondsSinceEpoch;
 
-    // Calculate seconds since NTP epoch (1900)
-    final secondsSince1970 = utc.millisecondsSinceEpoch ~/ 1000;
+    // Split into whole seconds and the microseconds within that second.
+    // Dart's % is never negative, so subtracting it floors the seconds,
+    // which keeps times before 1970 correct.
+    final subSecondMicros = microsSinceEpoch % 1000000;
+    final secondsSince1970 = (microsSinceEpoch - subSecondMicros) ~/ 1000000;
     final ntpSeconds = secondsSince1970 + _ntpEpochOffset;
 
-    // Calculate fractional seconds from microseconds
-    final microseconds = utc.microsecond;
-    final fractionOfSecond = (microseconds * 1000) /
-        1000000.0; // Convert to nanoseconds then to fraction
-    final ntpFraction = (fractionOfSecond * 0x100000000).round();
+    // Scale microseconds to a 32-bit binary fraction of a second
+    final ntpFraction = (subSecondMicros << 32) ~/ 1000000;
 
     final ntpTimestamp = (ntpSeconds << 32) | ntpFraction;
     return OscTimeTag.fromNtpTimestamp(ntpTimestamp);

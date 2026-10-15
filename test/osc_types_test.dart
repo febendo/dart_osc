@@ -424,6 +424,52 @@ void main() {
 
         expect(decoded.value.ntpTimestamp, equals(0x0000000080000000));
       });
+
+      test('should convert half a second from DateTime', () {
+        final timeTag = OscTimeTag.fromDateTime(
+          DateTime.utc(2026, 1, 1, 12, 0, 0, 500),
+        );
+        expect(timeTag.seconds, equals(3976257600));
+        expect(timeTag.fraction, equals(0x80000000));
+      });
+
+      test('should keep milliseconds and microseconds of DateTime', () {
+        final dateTimes = <DateTime>[
+          DateTime.utc(2026, 1, 1, 12, 0, 0, 250, 123),
+          DateTime.utc(2026, 1, 1, 12, 0, 0, 10, 900),
+          DateTime.utc(2026, 1, 1, 12, 0, 0, 999),
+          DateTime.utc(2026, 1, 1, 12, 0, 0, 999, 999),
+        ];
+
+        for (final dateTime in dateTimes) {
+          final timeTag = OscTimeTag.fromDateTime(dateTime);
+          final subSecondMicros =
+              dateTime.millisecond * 1000 + dateTime.microsecond;
+          expect(
+            timeTag.seconds,
+            equals(3976257600),
+            reason: 'Wrong seconds for $dateTime',
+          );
+          expect(
+            timeTag.fraction,
+            equals((subSecondMicros << 32) ~/ 1000000),
+            reason: 'Wrong fraction for $dateTime',
+          );
+          expect(
+            timeTag.toDateTime(),
+            equals(dateTime),
+            reason: 'Round trip failed for $dateTime',
+          );
+        }
+      });
+
+      test('should convert sub-second DateTime before 1970', () {
+        final dateTime = DateTime.utc(1969, 12, 31, 23, 59, 59, 500);
+        final timeTag = OscTimeTag.fromDateTime(dateTime);
+        expect(timeTag.seconds, equals(2208988799));
+        expect(timeTag.fraction, equals(0x80000000));
+        expect(timeTag.toDateTime(), equals(dateTime));
+      });
     });
   });
 }
