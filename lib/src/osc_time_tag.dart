@@ -17,21 +17,21 @@ class OscTimeTag {
 
   /// Creates an OSC Time Tag from a DateTime
   ///
-  /// Note: This loses some precision due to DateTime's microsecond resolution
-  /// vs NTP's ~200 picosecond resolution
+  /// The time tag is exact to the microsecond, which is the finest
+  /// resolution of [DateTime]. NTP time tags can be finer (about 233 ps).
   factory OscTimeTag.fromDateTime(DateTime dateTime) {
-    // Convert to UTC if not already
-    final utc = dateTime.toUtc();
+    // microsecondsSinceEpoch is independent of the time zone
+    final microsSinceEpoch = dateTime.microsecondsSinceEpoch;
 
-    // Calculate seconds since NTP epoch (1900)
-    final secondsSince1970 = utc.millisecondsSinceEpoch ~/ 1000;
+    // Split into whole seconds and the microseconds within that second.
+    // Dart's % is never negative, so subtracting it floors the seconds,
+    // which keeps times before 1970 correct.
+    final subSecondMicros = microsSinceEpoch % 1000000;
+    final secondsSince1970 = (microsSinceEpoch - subSecondMicros) ~/ 1000000;
     final ntpSeconds = secondsSince1970 + _ntpEpochOffset;
 
-    // Calculate fractional seconds from microseconds
-    final microseconds = utc.microsecond;
-    final fractionOfSecond = (microseconds * 1000) /
-        1000000.0; // Convert to nanoseconds then to fraction
-    final ntpFraction = (fractionOfSecond * 0x100000000).round();
+    // Scale microseconds to a 32-bit binary fraction of a second
+    final ntpFraction = (subSecondMicros << 32) ~/ 1000000;
 
     final ntpTimestamp = (ntpSeconds << 32) | ntpFraction;
     return OscTimeTag.fromNtpTimestamp(ntpTimestamp);
@@ -53,6 +53,9 @@ class OscTimeTag {
   ///
   /// Returns null for immediate time tags since they don't represent
   /// a specific point in time
+  ///
+  /// The fraction of a second is rounded to the nearest microsecond, the
+  /// finest resolution of [DateTime], so finer NTP precision is lost.
   DateTime? toDateTime() {
     if (isImmediate) return null;
 
