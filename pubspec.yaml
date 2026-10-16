@@ -1,6 +1,6 @@
 name: dart_osc
 description: A Dart implementation of the Open Sound Control (OSC) protocol specification 1.0
-version: 1.0.0
+version: 1.0.1
 repository: https://github.com/febendo/dart_osc
 issue_tracker: https://github.com/febendo/dart_osc/issues
 topics:
